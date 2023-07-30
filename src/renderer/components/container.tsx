@@ -9,11 +9,13 @@ import { classNames } from "renderer/tools/css_tools";
 interface ContainerConfig {
     children: React.ReactNode;
     className?: string;
-    hasColor?: boolean,
-    hasHoverColor?: boolean,
-    hasShadow?: boolean,
-    rounded?: boolean,
-    expand?: boolean,
+    hasColor?: boolean;
+    hasHoverColor?: boolean;
+    hasHoverColorTrans?: boolean;
+    hasShadow?: boolean;
+    rounded?: boolean;
+    expand?: boolean;
+    id?: string;
 }
 
 /**
@@ -29,8 +31,10 @@ export function Container({
     hasColor,
     hasShadow,
     hasHoverColor,
+    hasHoverColorTrans,
     rounded,
     expand,
+    id,
 }: ContainerConfig) {
     // Classname default to empty string
     if (className === undefined) {
@@ -43,6 +47,9 @@ export function Container({
     // hasHoverColor default to false
     if (hasHoverColor === undefined) {
         hasHoverColor = false;
+    }
+    if (hasHoverColorTrans === undefined) {
+        hasHoverColorTrans = false;
     }
     if (hasShadow === undefined) {
         hasShadow = false;
@@ -59,6 +66,7 @@ export function Container({
     return (
         <>
             <div
+                id={id}
                 className={classNames(
                     'flex min-w-0 min-h-0 overflow-hidden',
                     hasColor ? 'bg-fgcolor dark:bg-fgcolor-dark' : '',
@@ -69,7 +77,8 @@ export function Container({
                 )}>
                 <div className={classNames(
                     'flex flex-auto h-full w-full min-w-0 min-h-0',
-                    hasHoverColor ? 'hover:bg-black/5 dark:hover:bg-white/5 transition-colors' : '',
+                    hasHoverColor ? 'hover:bg-black/5 dark:hover:bg-white/5' : '',
+                    hasHoverColorTrans? 'transition-colors' : '',
                 )}>
                     {children}
                 </div>
@@ -78,6 +87,7 @@ export function Container({
 }
 
 interface FlexDivConfig {
+    id?: string;
     children?: React.ReactNode,
     className?: string,
     /**
@@ -98,6 +108,7 @@ interface FlexDivConfig {
 
 export function FlexDiv({
     children,
+    id,
     className,
     expand,
     clearMinLimit,
@@ -116,12 +127,14 @@ export function FlexDiv({
 
     return (
         <>
-            <div className={classNames(
-                'flex',
-                clearMinLimit ? 'min-h-0 min-w-0' : '',
-                expand ? 'h-full w-full' : '',
-                className,
-            )}>
+            <div
+                className={classNames(
+                    'flex',
+                    clearMinLimit ? 'min-h-0 min-w-0' : '',
+                    expand ? 'h-full w-full' : '',
+                    className,
+                )}
+                id={id}>
                 {children}
             </div>
         </>);
