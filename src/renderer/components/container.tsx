@@ -3,7 +3,7 @@
 import React from "react";
 
 // Tools
-import { classNames } from "tools/css_tools";
+import { classNames } from "renderer/tools/css_tools";
 
 
 interface ContainerConfig {

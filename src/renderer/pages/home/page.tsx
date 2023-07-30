@@ -1,22 +1,27 @@
 // Components
-import { Container, FlexDiv } from 'components/container';
-import { CFTextIcon } from 'components/icons/codeforces';
+import { useEffect, useState } from 'react';
+import { Container, FlexDiv } from 'renderer/components/container';
+import { CFTextIcon } from 'renderer/components/icons/codeforces';
 
 // Tools
-import { classNames } from 'tools/css_tools';
+import { classNames } from 'renderer/tools/css_tools';
 
-// Apis
-import { getContestList } from 'backend/api/contests';
-
+// Models
+import { ContestInfo } from 'main/api/cf/contests';
 
 export function HomePage() {
-    let contestInfo: string = '';
+    let [contestsStringInfo, setContestsStringInfo] = useState('Loading...');
+    useEffect(function () {
+        window.electron.ipcRenderer.invoke('api:cf:getContestList').then(function (value: ContestInfo[]) {
+            setContestsStringInfo(value[0].name);
+        });
+    }, []);
 
-    getContestList().then(function (value) {
-        if (value !== undefined) {
-            contestInfo = value;
-        }
-    });
+    async function refreshInfo() {
+        setContestsStringInfo('Refreshing...');
+        setContestsStringInfo(await window.electron.ipcRenderer.invoke('api:cf:getContestList'));
+    }
+
 
     return (
         <FlexDiv
@@ -47,8 +52,11 @@ export function HomePage() {
                     'flex-col justify-center items-start'
                 )}>
                 <p>
-                    {contestInfo}
+                    {contestsStringInfo}
                 </p>
+                <button onClick={refreshInfo}>
+                    Refresh
+                </button>
             </FlexDiv>
         </FlexDiv>
     );

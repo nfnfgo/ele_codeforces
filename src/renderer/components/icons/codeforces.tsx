@@ -1,8 +1,8 @@
 // Tools
-import { classNames } from 'tools/css_tools';
+import { classNames } from 'renderer/tools/css_tools';
 
 // Components
-import { Container, FlexDiv } from 'components/container';
+import { Container, FlexDiv } from 'renderer/components/container';
 
 export function CFTextIcon() {
     return (

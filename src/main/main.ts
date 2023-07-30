@@ -15,6 +15,11 @@ import log from 'electron-log';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
 
+// ipcMain Exposers
+import 'main/api/cf/exposers';
+
+
+
 class AppUpdater {
   constructor() {
     log.transports.file.level = 'info';
