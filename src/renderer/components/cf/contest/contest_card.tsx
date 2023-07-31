@@ -41,19 +41,25 @@ export function CFContestCard({
 
 export interface CFHistoryContestCardConfig {
     contestInfo: HistoryContestInfo;
+    selected?: boolean;
     className?: string;
 }
 
 export function CFHistoryContestCard({
     contestInfo,
+    selected,
     className,
 }: CFHistoryContestCardConfig) {
+    if (selected === undefined) {
+        selected = false;
+    }
     return (<Container
         id='contestInfo'
-        hasColor={true}
-        hasHoverColor={true}
+        hasColor={selected ? false : true}
+        hasHoverColor={selected ? false : true}
         hasHoverColorTrans={false}
         className={classNames(
+            selected ? 'bg-primary text-white' : '',
             className,
         )}>
         <FlexDiv className={classNames(
@@ -61,7 +67,7 @@ export function CFHistoryContestCard({
             'mx-4 my-2',
         )}>
             <h2 className={classNames(
-                'font-semibold text-xl'
+                'font-semibold text-xl text-start'
             )}>
                 {contestInfo.name}
             </h2>

@@ -78,7 +78,7 @@ export function Container({
                 <div className={classNames(
                     'flex flex-auto h-full w-full min-w-0 min-h-0',
                     hasHoverColor ? 'hover:bg-black/5 dark:hover:bg-white/5' : '',
-                    hasHoverColorTrans? 'transition-colors' : '',
+                    hasHoverColorTrans ? 'transition-colors' : '',
                 )}>
                     {children}
                 </div>
@@ -138,4 +138,16 @@ export function FlexDiv({
                 {children}
             </div>
         </>);
+}
+
+
+export function Center({ children, className }: { children: React.ReactNode, className?: string }) {
+    return (
+        <FlexDiv className={classNames(
+            'h-full w-full',
+            'flex-row justify-center items-center',
+            className,
+        )}>
+            {children}
+        </FlexDiv>);
 }

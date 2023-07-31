@@ -1,9 +1,3 @@
-// IPC
-import { ipcMain } from 'electron';
-
-// Tools
-import puppeteer from 'puppeteer';
-
 // Configs
 import * as cfConfig from './config';
 
@@ -17,6 +11,9 @@ export interface ContestInfo {
     length: string;
 };
 
+/**
+ * Get info of upcoming contest
+ */
 export async function getContestList(): Promise<ContestInfo[]> {
     try {
         let browser = await cfConfig.CFBrowser.getCfBrowser();
