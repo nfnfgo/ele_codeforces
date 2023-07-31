@@ -35,7 +35,7 @@ export async function getContestList(): Promise<ContestInfo[]> {
             }
             return contestList;
         });
-        cfContestPage.close();
+        await cfContestPage.close();
         return infoList;
     }
     catch (e) {
@@ -84,8 +84,7 @@ export async function getHistoryContestInfo(): Promise<HistoryContestInfo[]> {
             }
             return infoList;
         });
-        // close page
-        cfContestPage.close();
+        await cfContestPage.close();
         return historyContestInfoList;
     }
     catch (e) {

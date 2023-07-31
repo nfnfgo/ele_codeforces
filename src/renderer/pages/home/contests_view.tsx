@@ -1,3 +1,6 @@
+// CSS
+import './contest.css';
+
 // Fundamentals
 import { useState, useEffect } from 'react';
 
@@ -5,14 +8,14 @@ import { useState, useEffect } from 'react';
 import { Center, Container, FlexDiv } from 'renderer/components/container';
 import { CFContestCard, CFHistoryContestCard } from 'renderer/components/cf/contest/contest_card';
 import { HeadTitle, Title } from 'renderer/components/general/title';
+import { CFProblemInfoBlock } from 'renderer/components/cf/contest/problem_info_block';
 
 // Tools
 import { classNames } from 'renderer/tools/css_tools';
 
 // Models
 import { ContestInfo, HistoryContestInfo } from 'main/api/cf/contests';
-import { ProblemInfo } from 'main/api/cf/problems';
-import { CFProblemInfoBlock } from 'renderer/components/cf/contest/problem_info_block';
+import { ProblemDetailedInfo, ProblemInfo, getProblemDetailConfig } from 'main/api/cf/problems';
 
 
 export function CFContestsView() {
@@ -30,11 +33,6 @@ export function CFContestsView() {
             setHisContestInfo(value);
         });
     }, []);
-
-    async function refreshInfo() {
-        setContestsInfo([]);
-        setContestsInfo(await window.electron.ipcRenderer.invoke('api:cf:getContestList'));
-    }
 
 
     return (
@@ -123,38 +121,112 @@ export function CFContestsView() {
  */
 function CFContestDetailPanel({ contestId }: { contestId: number }) {
     const [problemsInfo, setProblemsInfo] = useState<ProblemInfo[]>([]);
-
     const [loading, setLoading] = useState<boolean>(false);
+    /**Store the problem id that user selected */
+    const [selectedProblemId, setSelectedProblemId] = useState<string | undefined>(undefined);
+    const [curProblemDetailedInfo, setCurProblemDetailedInfo] = useState<ProblemDetailedInfo | undefined>(undefined);
+    const [loadingProblemDetail, setLoadingProblemDetail] = useState<boolean>(false);
 
+    // Load info for this component
     useEffect(function () {
+        if (contestId === undefined) {
+            return;
+        }
         setLoading(true);
         window.electron.ipcRenderer.invoke('api:cf:getContestProblem', contestId).then(
             function (info) {
                 setLoading(false);
                 setProblemsInfo(info);
+                // Set default selected problem to the first problem
+                setSelectedProblemId((info as ProblemInfo[])[0].id);
             }
         );
     }, [contestId]);
 
+    // Load problem detailed info for this compoent everytime selected problem id changed
+    useEffect(function () {
+        if (selectedProblemId === undefined || contestId === undefined) {
+            return;
+        }
+        setLoadingProblemDetail(true);
+        // Construct params
+        let funcProp: getProblemDetailConfig = {
+            contestId: contestId,
+            problemId: selectedProblemId,
+        };
+        window.electron.ipcRenderer.invoke(
+            'api:cf:getProblemDetailedInfo',
+            funcProp
+        ).then(function (problemDetailedInfo) {
+            setCurProblemDetailedInfo(problemDetailedInfo);
+        });
+        setLoadingProblemDetail(false);
+    }, [selectedProblemId]);
+
     return (
-        <FlexDiv
-            className={classNames(
-                'px-2',
-                'flex-col justify-start items-start',
-                'overflow-hidden',
-                loading ? 'opacity-75' : '',
-            )}
+        <FlexDiv className={classNames(
+            'relative flex-col',
+        )}
             expand={true}>
             <FlexDiv
                 className={classNames(
-                    'flex-row gap-x-3',
-                    'py-2',
-                    'w-full',
-                    'overflow-x-auto',
-                )}>
-                {problemsInfo.map(function (problemInfo) {
-                    return (<CFProblemInfoBlock info={problemInfo} />);
-                })}
+                    'px-2 relative',
+                    'flex-col justify-start items-start',
+                    'overflow-y-auto',
+                    loading ? 'opacity-75' : '',
+                )}
+                expand={true}>
+                {/* Select Problem */}
+                <FlexDiv
+                    className={classNames(
+                        'sticky top-0',
+                        'bg-white/[.3] dark:bg-black/[.3]',
+                        'backdrop-blur-md',
+                        'flex-row gap-x-3',
+                        'py-2',
+                        'w-full',
+                        'relative',
+                        'overflow-x-auto',
+                    )}>
+                    {problemsInfo.map(function (problemInfo) {
+                        return (<CFProblemInfoBlock info={problemInfo} />);
+                    })}
+                </FlexDiv>
+                {/* Problem Detailed Info Part */}
+                <FlexDiv
+                    expand={true}
+                    className={classNames(
+                        'flex-col justify-start items-start',
+                        'py-2',
+                    )}>
+                    {function () {
+                        if (curProblemDetailedInfo === undefined) {
+                            return <Center>
+                                Problem Detailed Panel
+                            </Center>
+                        }
+                        return (
+                            <div id='codeforcesHtmlContent' className={classNames(
+                                'flex flex-col flex-auto h-full w-full min-w-0'
+                            )}>
+                                <Container
+                                    className='flex-none min-w-0 w-full'
+                                    hasColor={true}>
+                                    <div className={classNames(
+                                        'flex flex-none flex-col min-w-0 w-full',
+                                        'px-2 py-2',
+                                        '',
+                                    )}>
+                                        <div dangerouslySetInnerHTML={{ __html: curProblemDetailedInfo.description }}></div>
+                                        <div dangerouslySetInnerHTML={{ __html: curProblemDetailedInfo.inputSpec }}></div>
+                                        <div dangerouslySetInnerHTML={{ __html: curProblemDetailedInfo.outputSpec }}></div>
+                                        <div dangerouslySetInnerHTML={{ __html: curProblemDetailedInfo.samples }}></div>
+                                        <div dangerouslySetInnerHTML={{ __html: curProblemDetailedInfo.note }}></div>
+                                    </div>
+                                </Container>
+                            </div>);
+                    }()}
+                </FlexDiv>
             </FlexDiv>
         </FlexDiv>
     );

@@ -1,0 +1,76 @@
+.MJXp-math {
+    font-size: 130%;
+}
+
+#codeforcesHtmlContent *+p {
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+}
+
+#codeforcesHtmlContent ul {
+    margin-left: 1rem;
+}
+
+#codeforcesHtmlContent li::before {
+    content: '-';
+}
+
+#codeforcesHtmlContent pre>div.test-example-line {
+    padding-left: 4px;
+    padding-right: 4px;
+    display: flex;
+    flex: none;
+    min-width: 0px;
+    flex-direction: row;
+}
+
+#codeforcesHtmlContent pre>div.test-example-line:hover {
+    background: rgba(0, 0, 0, 0.2);
+}
+
+#codeforcesHtmlContent pre>div.test-example-line-even+div.test-example-line-odd {
+    counter-increment: line;
+}
+
+#codeforcesHtmlContent pre>div.test-example-line-odd+div.test-example-line-even {
+    counter-increment: line;
+}
+
+#codeforcesHtmlContent pre>div.test-example-line-even {
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 2px;
+}
+
+#codeforcesHtmlContent pre>div.test-example-line:hover::after {
+    display: flex;
+    opacity: 0.3;
+    flex: 1 1 auto;
+    min-width: 0px;
+    margin-left: auto;
+    padding-right: 2px;
+    justify-content: end;
+    content: counter(line);
+}
+
+#codeforcesHtmlContent pre {
+    margin-top: 2px;
+    margin-bottom: 2px;
+    border-radius: 10px;
+    border: solid 2px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+}
+
+/* Hide original title */
+#codeforcesHtmlContent .section-title {
+    display: none;
+}
+
+#codeforcesHtmlContent .title {
+    display: none;
+}
+
+/* Add Padding to the child of output pre */
+#codeforcesHtmlContent div.output>pre {
+    padding-left: 4px;
+    padding-right: 4px;
+}
