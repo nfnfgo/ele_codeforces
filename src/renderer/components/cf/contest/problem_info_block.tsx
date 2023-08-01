@@ -12,13 +12,23 @@ import { ProblemInfo } from 'main/api/cf/problems';
  * Returns a little block that show the basic info of the problem, 
  * usually used as a button for user to select problems
  */
-export function CFProblemInfoBlock({ info }: { info: ProblemInfo }) {
+export function CFProblemInfoBlock({ info, selected }:
+    {
+        info: ProblemInfo,
+        selected?: boolean
+    }) {
+    if (selected === undefined) {
+        selected = false;
+    }
     return (
         <Container
+            hasColor={selected ? false : true}
+            hasHoverColor={selected ? false : true}
             className={classNames(
-                'flex-none'
+                'flex-none',
+                selected ? 'bg-primary dark:bg-primary text-white dark:text-white' : ''
             )}
-            hasHoverColor={true}>
+        >
             <FlexDiv
                 className={classNames(
                     'flex-none flex-col justify-start items-start',
@@ -31,7 +41,7 @@ export function CFProblemInfoBlock({ info }: { info: ProblemInfo }) {
                     className={classNames(
                         'mt-1',
                         'flex-row justify-between',
-                        'text-black/50 dark:text-white/50'
+                        selected ? 'text-white/70 dark:text-white/70' : 'text-black/50 dark:text-white/50'
                     )}>
                     <div className='flex flex-row items-center'>
                         <GoogleIcon className='text-[18px] mr-1'>schedule</GoogleIcon>

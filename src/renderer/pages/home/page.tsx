@@ -8,6 +8,7 @@ import { CFContestsView } from './contests_view';
 
 // Tools
 import { classNames } from 'renderer/tools/css_tools';
+import { Link } from 'react-router-dom';
 
 // Models
 import { ContestInfo } from 'main/api/cf/contests';
@@ -42,7 +43,17 @@ export function HomePage() {
                         <div className='text-2xl'>
                             <CFTextIcon />
                         </div>
-                        <p>Account</p>
+                        <button
+                            onClick={function () {
+                                const childWindow = window.open('/contest', 'modal')
+                                childWindow.electron = window.electron;
+                            }}>
+                            Window.open
+                        </button>
+                        <Link to='/contest' target=''>LinkTo</Link>
+                        <Link to='/contest' target='_blank'>LinkTo_blank</Link>
+                        <a href='/contest' target=''>aHref</a>
+                        <a href='/contest' target='_blank'>aHref_blank</a>
                     </FlexDiv>
                 </Container>
                 <FlexDiv

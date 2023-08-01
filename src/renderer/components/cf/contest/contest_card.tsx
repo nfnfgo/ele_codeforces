@@ -27,11 +27,13 @@ export function CFContestCard({
             'mx-4 my-2',
         )}>
             <h2 className={classNames(
-                'font-semibold text-xl'
+                'font-semibold text-lg'
             )}>
                 {contestInfo.name}
             </h2>
-            <p>
+            <p className={classNames(
+                'text-black/50 dark:text-white/50'
+            )}>
                 {contestInfo.start}
             </p>
         </FlexDiv>
@@ -67,11 +69,13 @@ export function CFHistoryContestCard({
             'mx-4 my-2',
         )}>
             <h2 className={classNames(
-                'font-semibold text-xl text-start'
+                'font-semibold text-lg text-start'
             )}>
                 {contestInfo.name}
             </h2>
-            <p>
+            <p className={classNames(
+                selected?'text-white/50':'text-black/50 dark:text-white/50'
+            )}>
                 {contestInfo.start}
             </p>
         </FlexDiv>

@@ -28,6 +28,7 @@ class AppUpdater {
   }
 }
 
+
 let mainWindow: BrowserWindow | null = null;
 
 ipcMain.on('ipc-example', async (event, arg) => {
@@ -86,7 +87,12 @@ const createWindow = async () => {
     },
   });
 
-  mainWindow.loadURL(resolveHtmlPath('index.html'));
+  if (!process.env.NODE_ENV || process.env.NODE_ENV === 'development') {
+    mainWindow.loadURL(resolveHtmlPath(''));
+  }
+  else {
+    mainWindow.loadURL(resolveHtmlPath('index.html'));
+  }
 
   mainWindow.on('ready-to-show', () => {
     if (!mainWindow) {
@@ -108,8 +114,11 @@ const createWindow = async () => {
 
   // Open urls in the user's browser
   mainWindow.webContents.setWindowOpenHandler((edata) => {
-    shell.openExternal(edata.url);
-    return { action: 'deny' };
+    console.log('Opening new page:');
+    console.log(`URL: ${edata.url}`)
+    return {
+      action: 'allow'
+    };
   });
 
   // Remove this if your app does not use auto updates

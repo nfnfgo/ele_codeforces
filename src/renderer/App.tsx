@@ -1,4 +1,4 @@
-import { MemoryRouter as Router, Routes, Route } from 'react-router-dom';
+import { HashRouter, BrowserRouter, Routes, Route } from 'react-router-dom';
 import icon from '../../assets/icon.svg';
 import './App.css';
 
@@ -8,34 +8,33 @@ import { useLayoutEffect } from 'react';
 // Stores
 import { ThemeData, useThemeStore, useThemeStoreStateConfig } from 'renderer/stores/themeStore';
 
+
 // Pages
 import { HomePage } from 'renderer/pages/home/page';
-
-
-
+import { ProblemDetailedPanel } from 'renderer/pages/home/problem_detail_panel';
 
 export default function App() {
 
-  let curThemeData: ThemeData | undefined = useThemeStore(function (state) {
-    return (state as useThemeStoreStateConfig).theme;
-  });
 
-  useLayoutEffect(function () {
-    let darkMode: boolean = curThemeData.getDarkModeNow();
-    if (darkMode) {
-      document.documentElement.classList.add('dark');
-    }
-    else {
-      document.documentElement.classList.remove('dark');
-    }
-  }, [curThemeData.darkMode]);
 
+  let routes = (<Routes>
+    <Route path="/" element={<HomePage />} />
+    <Route path="/contest" element={<>
+      <ProblemDetailedPanel contestId={1854} problemId='A1' />
+    </>} />
+  </Routes>);
 
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-      </Routes>
-    </Router>
+    <>
+      {
+        function () {
+          if (!process.env.NODE_ENV || process.env.NODE_ENV === 'development') {
+            return (<BrowserRouter>
+              {routes}
+            </BrowserRouter>);
+          }
+          return (<HashRouter>{routes}</HashRouter>);
+        }()}
+    </>
   );
 }

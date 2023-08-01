@@ -574,11 +574,6 @@ video {
   top: 0px;
 }
 
-.mx-2 {
-  margin-left: 0.5rem;
-  margin-right: 0.5rem;
-}
-
 .mx-4 {
   margin-left: 1rem;
   margin-right: 1rem;
@@ -587,6 +582,10 @@ video {
 .my-2 {
   margin-top: 0.5rem;
   margin-bottom: 0.5rem;
+}
+
+.ml-2 {
+  margin-left: 0.5rem;
 }
 
 .mr-1 {
@@ -629,8 +628,8 @@ video {
   width: 10rem;
 }
 
-.w-\[15rem\] {
-  width: 15rem;
+.w-\[50rem\] {
+  width: 50rem;
 }
 
 .w-full {
@@ -645,8 +644,12 @@ video {
   min-width: 0px;
 }
 
-.max-w-\[40rem\] {
-  max-width: 40rem;
+.min-w-\[15rem\] {
+  min-width: 15rem;
+}
+
+.max-w-\[25rem\] {
+  max-width: 25rem;
 }
 
 .flex-auto {
@@ -782,6 +785,11 @@ video {
   font-size: 18px;
 }
 
+.text-lg {
+  font-size: 1.125rem;
+  line-height: 1.75rem;
+}
+
 .text-xl {
   font-size: 1.25rem;
   line-height: 1.75rem;
@@ -814,8 +822,16 @@ video {
   color: rgb(248 250 252 / var(--tw-text-opacity));
 }
 
-.opacity-75 {
-  opacity: 0.75;
+.text-white\/50 {
+  color: rgb(248 250 252 / 0.5);
+}
+
+.text-white\/70 {
+  color: rgb(248 250 252 / 0.7);
+}
+
+.opacity-50 {
+  opacity: 0.5;
 }
 
 .shadow-lg {
@@ -826,21 +842,6 @@ video {
 
 .filter {
   filter: var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow);
-}
-
-.backdrop-blur-xl {
-  --tw-backdrop-blur: blur(24px);
-  backdrop-filter: var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);
-}
-
-.backdrop-blur-2xl {
-  --tw-backdrop-blur: blur(40px);
-  backdrop-filter: var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);
-}
-
-.backdrop-blur-sm {
-  --tw-backdrop-blur: blur(4px);
-  backdrop-filter: var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);
 }
 
 .backdrop-blur-md {
@@ -902,13 +903,18 @@ video {
   background-color: rgb(2 6 23 / var(--tw-bg-opacity));
 }
 
+:is(.dark .dark\:bg-black\/\[\.3\]) {
+  background-color: rgb(2 6 23 / .3);
+}
+
 :is(.dark .dark\:bg-fgcolor-dark) {
   --tw-bg-opacity: 1;
   background-color: rgb(30 41 59 / var(--tw-bg-opacity));
 }
 
-:is(.dark .dark\:bg-black\/\[\.3\]) {
-  background-color: rgb(2 6 23 / .3);
+:is(.dark .dark\:bg-primary) {
+  --tw-bg-opacity: 1;
+  background-color: rgb(14 165 233 / var(--tw-bg-opacity));
 }
 
 :is(.dark .dark\:text-white) {
@@ -918,6 +924,10 @@ video {
 
 :is(.dark .dark\:text-white\/50) {
   color: rgb(248 250 252 / 0.5);
+}
+
+:is(.dark .dark\:text-white\/70) {
+  color: rgb(248 250 252 / 0.7);
 }
 
 :is(.dark .dark\:hover\:bg-white\/5:hover) {

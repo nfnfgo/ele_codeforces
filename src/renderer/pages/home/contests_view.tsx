@@ -9,6 +9,7 @@ import { Center, Container, FlexDiv } from 'renderer/components/container';
 import { CFContestCard, CFHistoryContestCard } from 'renderer/components/cf/contest/contest_card';
 import { HeadTitle, Title } from 'renderer/components/general/title';
 import { CFProblemInfoBlock } from 'renderer/components/cf/contest/problem_info_block';
+import { ProblemDetailedPanel } from './problem_detail_panel';
 
 // Tools
 import { classNames } from 'renderer/tools/css_tools';
@@ -44,14 +45,14 @@ export function CFContestsView() {
             <FlexDiv
                 id='contestList'
                 className={classNames(
-                    'flex-col max-w-[40rem]',
+                    'flex-col min-w-[15rem] max-w-[25rem]',
                     'flex-auto h-full w-[10rem]',
                     'gap-y-2',
                     'overflow-auto',
                 )}>
                 <FlexDiv className={classNames(
                     'flex-col',
-                    'mx-2'
+                    'ml-2'
                 )}>
                     <div>
                         <HeadTitle className={classNames(
@@ -100,7 +101,7 @@ export function CFContestsView() {
             <FlexDiv
                 id='contestDetailPanel'
                 className={classNames(
-                    'flex-auto h-full w-[15rem]',
+                    'flex-auto h-full w-[50rem]',
                 )}>
                 {function () {
                     if (selectedContestId === undefined) {
@@ -124,44 +125,26 @@ function CFContestDetailPanel({ contestId }: { contestId: number }) {
     const [loading, setLoading] = useState<boolean>(false);
     /**Store the problem id that user selected */
     const [selectedProblemId, setSelectedProblemId] = useState<string | undefined>(undefined);
-    const [curProblemDetailedInfo, setCurProblemDetailedInfo] = useState<ProblemDetailedInfo | undefined>(undefined);
-    const [loadingProblemDetail, setLoadingProblemDetail] = useState<boolean>(false);
+    const [selectedContestId, setSelectedContestId] = useState<number>(contestId);
 
     // Load info for this component
     useEffect(function () {
-        if (contestId === undefined) {
-            return;
-        }
         setLoading(true);
-        window.electron.ipcRenderer.invoke('api:cf:getContestProblem', contestId).then(
-            function (info) {
-                setLoading(false);
-                setProblemsInfo(info);
-                // Set default selected problem to the first problem
-                setSelectedProblemId((info as ProblemInfo[])[0].id);
-            }
-        );
-    }, [contestId]);
-
-    // Load problem detailed info for this compoent everytime selected problem id changed
-    useEffect(function () {
-        if (selectedProblemId === undefined || contestId === undefined) {
-            return;
+        try {
+            window.electron.ipcRenderer.invoke('api:cf:getContestProblem', contestId).then(
+                function (info) {
+                    setLoading(false);
+                    setProblemsInfo(info);
+                    // Set default selected problem to the first problem
+                    setSelectedContestId(contestId);
+                    setSelectedProblemId((info as ProblemInfo[])[0].id);
+                }
+            );
         }
-        setLoadingProblemDetail(true);
-        // Construct params
-        let funcProp: getProblemDetailConfig = {
-            contestId: contestId,
-            problemId: selectedProblemId,
-        };
-        window.electron.ipcRenderer.invoke(
-            'api:cf:getProblemDetailedInfo',
-            funcProp
-        ).then(function (problemDetailedInfo) {
-            setCurProblemDetailedInfo(problemDetailedInfo);
-        });
-        setLoadingProblemDetail(false);
-    }, [selectedProblemId]);
+        catch (e) {
+            setLoading(false);
+        }
+    }, [contestId]);
 
     return (
         <FlexDiv className={classNames(
@@ -170,15 +153,16 @@ function CFContestDetailPanel({ contestId }: { contestId: number }) {
             expand={true}>
             <FlexDiv
                 className={classNames(
-                    'px-2 relative',
+                    'relative',
                     'flex-col justify-start items-start',
                     'overflow-y-auto',
-                    loading ? 'opacity-75' : '',
+                    loading ? 'opacity-50' : '',
                 )}
                 expand={true}>
                 {/* Select Problem */}
                 <FlexDiv
                     className={classNames(
+                        'flex-none',
                         'sticky top-0',
                         'bg-white/[.3] dark:bg-black/[.3]',
                         'backdrop-blur-md',
@@ -189,44 +173,28 @@ function CFContestDetailPanel({ contestId }: { contestId: number }) {
                         'overflow-x-auto',
                     )}>
                     {problemsInfo.map(function (problemInfo) {
-                        return (<CFProblemInfoBlock info={problemInfo} />);
+                        return (
+                            <button
+                                className={classNames(
+                                    'flex flex-none',
+                                )}
+                                key={`${problemInfo.contestId}_${problemInfo.id}`}
+                                onClick={function () {
+                                    setSelectedProblemId(problemInfo.id);
+                                }}>
+                                <CFProblemInfoBlock
+                                    info={problemInfo}
+                                    selected={problemInfo.id === selectedProblemId}
+                                />
+                            </button>
+                        );
                     })}
                 </FlexDiv>
                 {/* Problem Detailed Info Part */}
-                <FlexDiv
-                    expand={true}
-                    className={classNames(
-                        'flex-col justify-start items-start',
-                        'py-2',
-                    )}>
-                    {function () {
-                        if (curProblemDetailedInfo === undefined) {
-                            return <Center>
-                                Problem Detailed Panel
-                            </Center>
-                        }
-                        return (
-                            <div id='codeforcesHtmlContent' className={classNames(
-                                'flex flex-col flex-auto h-full w-full min-w-0'
-                            )}>
-                                <Container
-                                    className='flex-none min-w-0 w-full'
-                                    hasColor={true}>
-                                    <div className={classNames(
-                                        'flex flex-none flex-col min-w-0 w-full',
-                                        'px-2 py-2',
-                                        '',
-                                    )}>
-                                        <div dangerouslySetInnerHTML={{ __html: curProblemDetailedInfo.description }}></div>
-                                        <div dangerouslySetInnerHTML={{ __html: curProblemDetailedInfo.inputSpec }}></div>
-                                        <div dangerouslySetInnerHTML={{ __html: curProblemDetailedInfo.outputSpec }}></div>
-                                        <div dangerouslySetInnerHTML={{ __html: curProblemDetailedInfo.samples }}></div>
-                                        <div dangerouslySetInnerHTML={{ __html: curProblemDetailedInfo.note }}></div>
-                                    </div>
-                                </Container>
-                            </div>);
-                    }()}
-                </FlexDiv>
+                <ProblemDetailedPanel
+                    contestId={selectedContestId}
+                    problemId={selectedProblemId}
+                />
             </FlexDiv>
         </FlexDiv>
     );
