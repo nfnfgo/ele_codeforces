@@ -45,7 +45,9 @@ export function HomePage() {
                         </div>
                         <button
                             onClick={function () {
-                                const childWindow = window.open('/contest', 'modal')
+                                let childWindow = window.open('/contest', '_blank');
+                                console.log('New window:');
+                                console.log(childWindow);
                                 childWindow.electron = window.electron;
                             }}>
                             Window.open

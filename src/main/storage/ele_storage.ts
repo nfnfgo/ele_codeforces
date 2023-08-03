@@ -7,25 +7,37 @@ import { ipcMain } from 'electron';
 import * as errs from 'general/error/base';
 
 export interface EleCFStorageConfig {
+    /**
+     * Name used for the storage file and the ipcMain channel name (if choose to expose)
+     */
     storageName?: string;
     defaultValue?: any;
+    /**
+     * If ture, the setInfo and getInfo method will be add to ipcMain handler
+     * 
+     * For more info, check `this.addIpcMainHandler()`
+     * */
+    exposeToIpcMain?: boolean;
 }
 
 /**
  * Custom persist storage class
  */
-class EleCFStorage {
+export class EleCFStorage {
     constructor({
         storageName,
         defaultValue,
-    }:
-        EleCFStorageConfig) {
+        exposeToIpcMain,
+    }: EleCFStorageConfig) {
         // set default value
         if (storageName === undefined) {
             storageName = 'eleCfConfig';
         }
         if (defaultValue === undefined) {
             defaultValue = {};
+        }
+        if (exposeToIpcMain === undefined) {
+            exposeToIpcMain = true;
         }
         // adopted default value
         this.storageName = storageName;
@@ -43,6 +55,10 @@ class EleCFStorage {
         } catch (e) {
             ;
         }
+        // expose to ipcMain if needed
+        if (exposeToIpcMain === true) {
+            this.addIpcMainHandler();
+        }
     }
     /**The name used as the name of the json file when storage info of this class */
     storageName: string;
@@ -50,21 +66,26 @@ class EleCFStorage {
     jsonInfo: any;
 
     /**
-     * Register methods to the ipcMain 
+     * Register methods to the ipcMain
      * 
      * Notice:
      * - The method should only be called in electron main process env
      * */
     addIpcMainHandler(channelPrefix?: string): void {
+        let self = this;
         if (channelPrefix === undefined) {
             channelPrefix = `storage:${this.storageName}`;
         }
         // expose getInfo method
-        let getInfo = this.getInfo();
         function getInfoHandler(event, propName: string) {
-            return getInfo(propName);
+            return self.getInfo(propName);
         }
-        ipcMain.handle(`${channelPrefix}:get`, getInfoHandler);
+        ipcMain.handle(`${channelPrefix}:getInfo`, getInfoHandler);
+        // expose setInfo method
+        function setInfoHandler(event, propName, info) {
+            return self.setInfo(propName, info);
+        }
+        ipcMain.handle(`${channelPrefix}:setInfo`, setInfoHandler);
     }
 
     /**Get info of this storage 
@@ -101,7 +122,39 @@ class EleCFStorage {
                 `Could not read info with propName ${propName}\n` +
                 `Detailed error message: \n` +
                 `storageName:${this.storageName}\n` +
-                `jsonInfo: ${this.jsonInfo}`
+                `jsonInfo: ${this.jsonInfo}` +
+                `Error info: ${e}`
+            );
+        }
+    }
+
+    /**
+     * Set info of this storage
+     * 
+     * Notice:
+     * - Do NOT pass uncheck or unsecure params to info, since 
+     * this method use `eval()` to add info to the storage jsonInfo
+     */
+    setInfo(propName: string, info: any) {
+        try {// reach the propName
+            let propList = propName.split('.');
+            let curPropName = `this.jsonInfo`;
+            for (let propName of propList) {
+                curPropName = `${curPropName}.${propName}`;
+                let res = eval(curPropName);
+                if (res === undefined) {
+                    eval(`${curPropName} = {}`);
+                }
+            }
+            eval(`${curPropName} = JSON.parse(${JSON.stringify(info)})`);
+        } catch (e) {
+            throw new errs.EleCFError(
+                'StorageInfoWriteError',
+                `Could not write info with propName ${propName}\n` +
+                `Detailed error message: \n` +
+                `storageName:${this.storageName}\n` +
+                `jsonInfo: ${this.jsonInfo}` +
+                `Error info: ${e}`
             );
         }
     }

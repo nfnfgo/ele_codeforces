@@ -18,6 +18,9 @@ import { resolveHtmlPath } from './util';
 // ipcMain Exposers
 import 'main/api/cf/exposers';
 
+// Storage 
+import { EleCFStorage, EleCFStorageConfig } from 'main/storage/ele_storage';
+
 
 
 class AppUpdater {
@@ -28,8 +31,19 @@ class AppUpdater {
   }
 }
 
-
+// Create new window
 let mainWindow: BrowserWindow | null = null;
+
+// Create new storage file
+let storage = new EleCFStorage({
+  storageName: 'eleCfConfig',
+  defaultValue: {
+    theme: {
+      darkmode: true,
+    }
+  }
+
+});
 
 ipcMain.on('ipc-example', async (event, arg) => {
   const msgTemplate = (pingPong: string) => `IPC test: ${pingPong}`;

@@ -12,17 +12,18 @@ export function getSystemDarkmodePref(): boolean {
 }
 
 
-// export function useDarkmodeEffect() {
-//     let curDarkmode = (new Store()).get('electron.theme.darkmode');
-//     if (curDarkmode === undefined) {
-//         curDarkmode = getSystemDarkmodePref();
-//     }
-//     useLayoutEffect(function () {
-//         if (curDarkmode === true) {
-//             document.documentElement.classList.add('dark');
-//         }
-//         else {
-//             document.documentElement.classList.remove('dark');
-//         }
-//     }, [curDarkmode]);
-// }
+/**
+ * Update darkmode UI based on the info in the storage and the user system pref
+ */
+export async function updateDarkModeUIFromStorage() {
+    let curDarkmode = await window.electron.ipcRenderer.invoke('storage:eleCfConfig:getInfo', 'theme.darkmode');
+    if (curDarkmode === undefined) {
+        curDarkmode = getSystemDarkmodePref();
+    }
+    if (curDarkmode === true) {
+        document.documentElement.classList.add('dark');
+    }
+    else {
+        document.documentElement.classList.remove('dark');
+    }
+}
