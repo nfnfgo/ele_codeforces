@@ -21,7 +21,8 @@ import 'main/api/cf/exposers';
 // Storage 
 import { EleCFStorage, EleCFStorageConfig } from 'main/storage/ele_storage';
 
-
+// Tools
+import { openNewWindow, openNewWindowConfig, exposeOpenerToIpcMain as windowOptExposer } from 'main/tools/window_opener';
 
 class AppUpdater {
   constructor() {
@@ -34,7 +35,7 @@ class AppUpdater {
 // Create new window
 let mainWindow: BrowserWindow | null = null;
 
-// Create new storage file
+// Create new storage file (expose work complete autoly in the constructor)
 let storage = new EleCFStorage({
   storageName: 'eleCfConfig',
   defaultValue: {
@@ -42,8 +43,10 @@ let storage = new EleCFStorage({
       darkmode: true,
     }
   }
-
 });
+
+// Exposer method
+windowOptExposer();
 
 ipcMain.on('ipc-example', async (event, arg) => {
   const msgTemplate = (pingPong: string) => `IPC test: ${pingPong}`;
@@ -105,7 +108,7 @@ const createWindow = async () => {
     mainWindow.loadURL(resolveHtmlPath(''));
   }
   else {
-    mainWindow.loadURL(resolveHtmlPath('index.html'));
+    mainWindow.loadURL(resolveHtmlPath(''));
   }
 
   mainWindow.on('ready-to-show', () => {
@@ -123,15 +126,15 @@ const createWindow = async () => {
     mainWindow = null;
   });
 
-  const menuBuilder = new MenuBuilder(mainWindow);
-  menuBuilder.buildMenu();
-
-  // Open urls in the user's browser
   mainWindow.webContents.setWindowOpenHandler((edata) => {
     console.log('Opening new page:');
-    console.log(`URL: ${edata.url}`)
+    console.log(`URL: ${edata.url}`);
+    openNewWindow({
+      url: edata.url,
+      isFullUrl: true,
+    });
     return {
-      action: 'allow'
+      action: 'deny',
     };
   });
 

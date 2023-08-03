@@ -9,5 +9,7 @@ export function resolveHtmlPath(htmlFileName: string) {
     url.pathname = htmlFileName;
     return url.href;
   }
-  return `file://${path.resolve(__dirname, '../renderer/', htmlFileName)}`;
+  let basePath = path.resolve(__dirname, '../renderer/index.html#');
+  basePath = basePath + htmlFileName;
+  return `file://${basePath}`;
 }

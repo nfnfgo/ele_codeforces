@@ -12,6 +12,7 @@ import { Link } from 'react-router-dom';
 
 // Models
 import { ContestInfo } from 'main/api/cf/contests';
+import { openNewWindowConfig } from 'main/tools/window_opener';
 
 export function HomePage() {
 
@@ -45,15 +46,17 @@ export function HomePage() {
                         </div>
                         <button
                             onClick={function () {
-                                let childWindow = window.open('/contest', '_blank');
-                                console.log('New window:');
-                                console.log(childWindow);
-                                childWindow.electron = window.electron;
+                                let param: openNewWindowConfig = {
+                                    url: '/contest',
+                                    isFullUrl: false,
+                                };
+                                console.log('Contact ipcMain to open new window');
+                                window.electron.ipcRenderer.invoke('windowopt:open', param);
                             }}>
                             Window.open
                         </button>
                         <Link to='/contest' target=''>LinkTo</Link>
-                        <Link to='/contest' target='_blank'>LinkTo_blank</Link>
+                        <Link to='contest' target='_blank'>LinkTo_blank</Link>
                         <a href='/contest' target=''>aHref</a>
                         <a href='/contest' target='_blank'>aHref_blank</a>
                     </FlexDiv>
@@ -65,7 +68,7 @@ export function HomePage() {
                     )}>
                     <CFContestsView></CFContestsView>
                 </FlexDiv>
-            </FlexDiv>
-        </div>
+            </FlexDiv >
+        </div >
     );
 }
