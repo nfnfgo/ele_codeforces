@@ -4,8 +4,11 @@ import { BrowserWindow } from 'electron';
 // Tools
 import { openNewWindow } from 'main/tools/window_opener';
 
+// config
+import { windowInfo } from './configs';
+const settingsWindowConfig = windowInfo.settings;
+
 import { windowInstance, WindowManageInstanceData, WindowManageInstanceDataConfig } from './instance';
-import * as windowConfig from './configs';
 
 /**
  * Open app settings window
@@ -15,9 +18,9 @@ import * as windowConfig from './configs';
  * - If the window with name `settings` already in the instance list, 
  * this function will not open a new window, and only open the previous one
  */
-function openSettingsWindow() {
+export function openSettingsWindow() {
     // first check if has previous setting winodw
-    let prevWindow = windowInstance.getNameWindow(windowConfig.windowName.settings);
+    let prevWindow = windowInstance.getNameWindow(settingsWindowConfig.name);
     // if window already exist
     if (prevWindow !== undefined) {
         prevWindow.instance.show();
@@ -25,12 +28,12 @@ function openSettingsWindow() {
     }
     // else, create new window
     let settingsWindow: BrowserWindow = openNewWindow({
-        url: '/settings',
+        url: settingsWindowConfig.path,
         isFullUrl: false,
         show: true,
         onWindowClosed: function () {
-            windowInstance.removeNameWindow(windowConfig.windowName.settings);
+            windowInstance.removeNameWindow(settingsWindowConfig.name);
         }
     });
-    windowInstance.addNameWindow(windowConfig.windowName.settings, settingsWindow);
+    windowInstance.addNameWindow(settingsWindowConfig.name, settingsWindow);
 }

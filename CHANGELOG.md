@@ -3,3 +3,4 @@
 - WorkOn: Update: Add window management module
 - WorkOn: Update: Add settings page
 - Update: Add Readme for `EleCFStorage`
+- Update: Change config structure of window management module

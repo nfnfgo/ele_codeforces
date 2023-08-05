@@ -6,4 +6,8 @@
 
 import { ipcMain } from "electron";
 
-import { } from './settings_window';
+import { openSettingsWindow } from './settings_window';
+
+ipcMain.handle('windowmgr:open:settings', function () {
+    return openSettingsWindow();
+});

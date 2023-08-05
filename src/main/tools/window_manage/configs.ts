@@ -1,3 +1,6 @@
-export const windowName = {
-    settings: 'settings',
+export const windowInfo = {
+    settings: {
+        name: 'settings',
+        path: '/settings',
+    },
 };
