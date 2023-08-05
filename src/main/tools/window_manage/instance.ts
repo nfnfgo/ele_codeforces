@@ -17,7 +17,8 @@ export interface WindowManageInstanceDataConfig {
  * 
  * Notice:
  * - `name` will be default to "unnamed" if it was undefined when 
- * initializing 
+ * initializing. This is NOT recommend and every window should has 
+ * a unique `name`
  */
 export class WindowManageInstanceData {
     constructor({
@@ -40,21 +41,66 @@ export class WindowManageInstanceData {
     name: string;
 };
 
-
-interface windowInstanceConfig {
+class WindowInstance {
+    constructor() {
+        this.mainWindow = null;
+        this.windowsList = [];
+    }
     /**Main window of the app */
     mainWindow: BrowserWindow | null;
     /**
-     * List of opened windows, not included `mainWindow`
+     * List data of opened windows, not included `mainWindow`
      */
     windowsList: WindowManageInstanceData[];
+
+    /**
+     * Add new window into `windowInstance.windowsList`
+     */
+    addNameWindow(name: string, window: BrowserWindow): void {
+        this.windowsList.push(new WindowManageInstanceData({
+            instance: window,
+            name: name,
+        }));
+    }
+
+    /**
+     * Returns the first `WindowManageInstanceData` instance with specified `name`
+     * 
+     * Notice:
+     * - If no window with the specified name found, return `undefined`
+     * - You can use `getNameWindow(name) === undefined` to check if a window with 
+     * specified name is already in the list
+     */
+    getNameWindow(name: string): WindowManageInstanceData | undefined {
+        for (let winData of this.windowsList) {
+            if (winData.name === name) {
+                return winData;
+            }
+        }
+        return undefined;
+    }
+
+    /**
+     * Remove ALL window instance with specified `name`
+     * 
+     * Notice:
+     * - This method should only be called when you are certain that 
+     * a window with specified `name` has been closed. Usually should be 
+     * called in `BrowserWindow` `closed` event
+     */
+    removeNameWindow(name: string) {
+        let len = this.windowsList.length;
+        for (let i = 0; i < len; ++i) {
+            if (this.windowsList[i].name === name) {
+                this.windowsList.splice(i, 1);
+                --i;
+                --len;
+            }
+        }
+    }
 }
 
-
-export let windowInstance: windowInstanceConfig = {
-    mainWindow: null,
-    windowsList: [],
-}
+export let windowInstance: WindowInstance = new WindowInstance();
 
 export interface sendToAllWindowsConfig {
     /**If this messaeg also should send to mainWindow */

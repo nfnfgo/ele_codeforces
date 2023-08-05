@@ -20,6 +20,20 @@ export interface openNewWindowConfig {
      * If url param passed is a full url
      */
     isFullUrl?: boolean;
+    /**
+     * Show the browerwindow after creating it
+     * 
+     * If you need to operate on the new window before it shows, 
+     * you can set this param to `false`
+     */
+    show?: boolean;
+    /**
+     * Function called when this window is about to close
+     * 
+     * Usually, you need to remove all reference of this window to 
+     * avoid using it again
+     */
+    onWindowClosed?: () => (any);
 }
 
 /**
@@ -28,9 +42,17 @@ export interface openNewWindowConfig {
 export function openNewWindow({
     url,
     isFullUrl,
+    show,
+    onWindowClosed,
 }: openNewWindowConfig): BrowserWindow {
     if (isFullUrl === undefined) {
         isFullUrl = false;
+    }
+    if (show === undefined) {
+        show = true;
+    }
+    if (onWindowClosed === undefined) {
+        onWindowClosed = () => (undefined);
     }
     const RESOURCES_PATH = app.isPackaged
         ? path.join(process.resourcesPath, '../assets')
@@ -65,13 +87,14 @@ export function openNewWindow({
         }
         if (process.env.START_MINIMIZED) {
             newWindow.minimize();
-        } else {
+        } else if (show === true) {
             newWindow.show();
         }
     });
 
     newWindow.on('closed', () => {
         newWindow = null;
+        onWindowClosed();
     });
 
     newWindow.webContents.setWindowOpenHandler(generalWindowOpenHandler);
@@ -107,14 +130,13 @@ export function exposeOpenerToIpcMain(channelName?: string): void {
 /**
  * General window open handler for this app
  * 
- * Usually used with `windowInstance.webContents.setWindowOpenHandler()`
+ * Usually used with `[Instance of BrowserWindow].webContents.setWindowOpenHandler()`
  */
 export function generalWindowOpenHandler(handleDetail: Electron.HandlerDetails): { action: 'deny' } {
-    console.log('Opening new page:');
-    console.log(`URL: ${handleDetail.url}`);
     openNewWindow({
         url: handleDetail.url,
         isFullUrl: true,
+        show: true,
     });
     return {
         action: 'deny',
