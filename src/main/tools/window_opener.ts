@@ -1,3 +1,12 @@
+/**
+ * This module provide a method to open window in main process with 
+ * standard window open handler
+ * 
+ * To enable compelete functionality, you may need to call `exposeOpenerToIpcMain` 
+ * to expose the window open function to ipc channel
+ */
+
+
 import { BrowserWindow, ipcMain } from 'electron';
 import { app } from 'electron';
 import path from 'path';
@@ -14,7 +23,7 @@ export interface openNewWindowConfig {
 }
 
 /**
- * Open a new window in the main process with specified config
+ * Open a new window in the main process with specified url and config
  */
 export function openNewWindow({
     url,
@@ -65,17 +74,7 @@ export function openNewWindow({
         newWindow = null;
     });
 
-    newWindow.webContents.setWindowOpenHandler((edata) => {
-        console.log('Opening new page:');
-        console.log(`URL: ${edata.url}`);
-        openNewWindow({
-            url: edata.url,
-            isFullUrl: true,
-        });
-        return {
-            action: 'deny',
-        };
-    });
+    newWindow.webContents.setWindowOpenHandler(generalWindowOpenHandler);
 
     return newWindow;
 }
@@ -85,7 +84,7 @@ export function openNewWindow({
  * open a new window
  * 
  * Params:
- * - `channelName` Name of  the exposed channel, default to `windowopt:open`
+ * - `channelName` (Optional) Name of  the exposed channel, default to `windowopt:open`
  * 
  * Notice:
  * - The ipcMain receive params will be sync with the params of function `openNewWindow()` 
@@ -103,4 +102,21 @@ export function exposeOpenerToIpcMain(channelName?: string): void {
             return false;
         }
     });
+}
+
+/**
+ * General window open handler for this app
+ * 
+ * Usually used with `windowInstance.webContents.setWindowOpenHandler()`
+ */
+export function generalWindowOpenHandler(handleDetail: Electron.HandlerDetails): { action: 'deny' } {
+    console.log('Opening new page:');
+    console.log(`URL: ${handleDetail.url}`);
+    openNewWindow({
+        url: handleDetail.url,
+        isFullUrl: true,
+    });
+    return {
+        action: 'deny',
+    };
 }

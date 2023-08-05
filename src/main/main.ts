@@ -23,6 +23,7 @@ import { EleCFStorage, EleCFStorageConfig } from 'main/storage/ele_storage';
 
 // Tools
 import { openNewWindow, openNewWindowConfig, exposeOpenerToIpcMain as windowOptExposer } from 'main/tools/window_opener';
+import { windowInstance } from 'main/tools/window_manage/instance';
 
 class AppUpdater {
   constructor() {
@@ -32,8 +33,8 @@ class AppUpdater {
   }
 }
 
-// Create new window
-let mainWindow: BrowserWindow | null = null;
+// Store the main window
+windowInstance.mainWindow = null;
 
 // Create new storage file (expose work complete autoly in the constructor)
 let storage = new EleCFStorage({
@@ -79,7 +80,7 @@ const installExtensions = async () => {
     .catch(console.log);
 };
 
-const createWindow = async () => {
+async function createWindow(): Promise<BrowserWindow> {
   if (isDebug) {
     await installExtensions();
   }
@@ -92,7 +93,7 @@ const createWindow = async () => {
     return path.join(RESOURCES_PATH, ...paths);
   };
 
-  mainWindow = new BrowserWindow({
+  let win = new BrowserWindow({
     show: false,
     width: 1024,
     height: 728,
@@ -105,28 +106,28 @@ const createWindow = async () => {
   });
 
   if (!process.env.NODE_ENV || process.env.NODE_ENV === 'development') {
-    mainWindow.loadURL(resolveHtmlPath(''));
+    win.loadURL(resolveHtmlPath(''));
   }
   else {
-    mainWindow.loadURL(resolveHtmlPath(''));
+    win.loadURL(resolveHtmlPath(''));
   }
 
-  mainWindow.on('ready-to-show', () => {
-    if (!mainWindow) {
-      throw new Error('"mainWindow" is not defined');
+  win.on('ready-to-show', () => {
+    if (!win) {
+      throw new Error('"windowInstance.mainWindow" is not defined');
     }
     if (process.env.START_MINIMIZED) {
-      mainWindow.minimize();
+      win.minimize();
     } else {
-      mainWindow.show();
+      win.show();
     }
   });
 
-  mainWindow.on('closed', () => {
-    mainWindow = null;
+  win.on('closed', () => {
+    win = null;
   });
 
-  mainWindow.webContents.setWindowOpenHandler((edata) => {
+  win.webContents.setWindowOpenHandler((edata) => {
     console.log('Opening new page:');
     console.log(`URL: ${edata.url}`);
     openNewWindow({
@@ -141,6 +142,8 @@ const createWindow = async () => {
   // Remove this if your app does not use auto updates
   // eslint-disable-next-line
   new AppUpdater();
+
+  return win;
 };
 
 /**
@@ -158,11 +161,17 @@ app.on('window-all-closed', () => {
 app
   .whenReady()
   .then(() => {
-    createWindow();
+    createWindow().then(function (win) {
+      windowInstance.mainWindow = win;
+    })
     app.on('activate', () => {
       // On macOS it's common to re-create a window in the app when the
       // dock icon is clicked and there are no other windows open.
-      if (mainWindow === null) createWindow();
+      if (windowInstance.mainWindow === null) {
+        createWindow().then(function (win) {
+          windowInstance.mainWindow = win;
+        })
+      }
     });
   })
   .catch(console.log);

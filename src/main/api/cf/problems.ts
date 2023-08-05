@@ -34,27 +34,32 @@ export async function getContestProblems(contestId: number): Promise<ProblemInfo
         // get browser and element needed
         let browser = await cfConfig.CFBrowser.getCfBrowser();
         let problemInfoPage = await browser.newPage();
-        await problemInfoPage.goto(`${cfConfig.baseUrl}/contest/${contestId}`);
-        let tbodySelector = '#pageContent > .datatable > div > table.problems > tbody';
-        let problemsTbody = await problemInfoPage.waitForSelector(tbodySelector);
-        // extract info
-        problemInfoList = await problemsTbody.$$eval('tr', function (trList, contestId) {
-            let resList: ProblemInfo[] = [];
-            let cnt: number = trList.length;
-            for (let i: number = 1; i < cnt; ++i) {
-                let curTrEle = trList[i];
-                let tdList = curTrEle.getElementsByTagName('td');
-                resList.push({
-                    contestId: contestId,
-                    id: tdList[0].innerText,
-                    name: (tdList[1].querySelector('div > div > a') as HTMLAnchorElement).innerText,
-                    limit: tdList[1].querySelector('div > div.notice').childNodes[2].nodeValue.trim(),
-                    solvedCount: parseInt(tdList[3].querySelector('a').innerText.trim().substring(1)),
-                });
-            }
-            return resList;
-        }, contestId);
-        problemInfoPage.close();
+        try {
+            await problemInfoPage.goto(`${cfConfig.baseUrl}/contest/${contestId}`);
+            let tbodySelector = '#pageContent > .datatable > div > table.problems > tbody';
+            let problemsTbody = await problemInfoPage.waitForSelector(tbodySelector);
+            // extract info
+            problemInfoList = await problemsTbody.$$eval('tr', function (trList, contestId) {
+                let resList: ProblemInfo[] = [];
+                let cnt: number = trList.length;
+                for (let i: number = 1; i < cnt; ++i) {
+                    let curTrEle = trList[i];
+                    let tdList = curTrEle.getElementsByTagName('td');
+                    resList.push({
+                        contestId: contestId,
+                        id: tdList[0].innerText,
+                        name: (tdList[1].querySelector('div > div > a') as HTMLAnchorElement).innerText,
+                        limit: tdList[1].querySelector('div > div.notice').childNodes[2].nodeValue.trim(),
+                        solvedCount: parseInt(tdList[3].querySelector('a').innerText.trim().substring(1)),
+                    });
+                }
+                return resList;
+            }, contestId);
+        } catch (e) {
+            throw new Error('Failed to request contest problems data');
+        } finally {
+            await problemInfoPage.close();
+        }
         return problemInfoList;
     }
     catch (e) {
@@ -73,15 +78,15 @@ export interface ProblemDetailedInfo {
     /**Id of this problem */
     id: string,
     /**HTML format string contains question description info*/
-    description: string;
+    description?: string;
     /**HTML format string contains input specification */
     inputSpec: string;
     /**HTML format string contains output specification */
     outputSpec: string;
     /**HTML format string contains testcases samples */
-    samples: string;
+    samples?: string;
     /**HTML format string containse input and output note */
-    note: string;
+    note?: string;
 }
 
 
@@ -103,39 +108,60 @@ export async function getProblemDetailedInfo({ contestId, problemId }: getProble
     }
     let browser = await cfConfig.CFBrowser.getCfBrowser();
     let detailedProblemPage = await browser.newPage();
-    //div.problem-statement > div.header + div
-    await detailedProblemPage.goto(`${cfConfig.baseUrl}/contest/${contestId}/problem/${problemId}`);
-    let problemStatementEle = await detailedProblemPage.waitForSelector('div.problem-statement');
-    // description
-    let description = await problemStatementEle.$eval('div.header + div', function (ele) {
-        return ele.innerHTML;
-    });
-    // input
-    let inputSpec = await problemStatementEle.$eval('div.input-specification', function (ele) {
-        return ele.innerHTML;
-    });
-    // output
-    let outputSpec = await problemStatementEle.$eval('div.output-specification', function (ele) {
-        return ele.innerHTML;
-    });
-    // samples
-    let samples = await problemStatementEle.$eval('div.sample-tests', function (ele) {
-        return ele.innerHTML;
-    });
-    // note
-    let note = await problemStatementEle.$eval('div.note', function (ele) {
-        return ele.innerHTML;
-    });
-    // Close page
-    await detailedProblemPage.close();
+    let detailProblemProp: ProblemDetailedInfo | undefined = undefined;
+    try {//div.problem-statement > div.header + div
+        await detailedProblemPage.goto(`${cfConfig.baseUrl}/contest/${contestId}/problem/${problemId}`);
+        let problemStatementEle = await detailedProblemPage.waitForSelector('div.problem-statement');
+        // description
+        let description;
+        try {
+            description = await problemStatementEle.$eval('div.header + div', function (ele) {
+                return ele.innerHTML;
+            });
+        } catch (e) {
+            ;
+        }
+        // input
+        let inputSpec = await problemStatementEle.$eval('div.input-specification', function (ele) {
+            return ele.innerHTML;
+        });
+        // output
+        let outputSpec = await problemStatementEle.$eval('div.output-specification', function (ele) {
+            return ele.innerHTML;
+        });
+        // samples
+        let samples;
+        try {
+            samples = await problemStatementEle.$eval('div.sample-tests', function (ele) {
+                return ele.innerHTML;
+            });
+        } catch (e) {
+            ;
+        }
+        // note
+        let note;
+        try {
+            note = await problemStatementEle.$eval('div.note', function (ele) {
+                return ele.innerHTML;
+            });
+        } catch (e) {
+            ;
+        }
+        detailProblemProp = {
+            contestId: contestId,
+            id: problemId,
+            description: description,
+            inputSpec: inputSpec,
+            outputSpec: outputSpec,
+            samples: samples,
+            note: note,
+        };
+    } catch (e) {
+        throw new Error('Failed to request problem detailed data');
+    } finally {
+        await detailedProblemPage.close();
+    }
+
     // return 
-    return {
-        contestId: contestId,
-        id: problemId,
-        description: description,
-        inputSpec: inputSpec,
-        outputSpec: outputSpec,
-        samples: samples,
-        note: note,
-    };
+    return detailProblemProp;
 }
