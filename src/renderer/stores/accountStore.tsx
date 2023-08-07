@@ -114,7 +114,7 @@ export const useAccountStore = create(
         let storeInfo: useAccountStoreConfig = {
             accountData: new AccountData(),
             async tryLogin(account, password) {
-                return true;
+                return false;
             },
         }
 

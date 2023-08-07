@@ -1,10 +1,11 @@
-
 - WorkOn: Settings page.
-- WorkOn: Add account store
+- WorkOn: Codeforces Account API
+
 
 ## 0.1.1
 
 - Update: Add `Background` component
+- Update: Add account store
 
 ## 0.1.0
 
