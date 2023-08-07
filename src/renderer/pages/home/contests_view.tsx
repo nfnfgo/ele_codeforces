@@ -60,7 +60,9 @@ export function CFContestsView() {
                             'sticky top-0'
                         )}
                             hasColor={true}>Upcoming Round</HeadTitle>
-                        <ul>
+                        <ul className={classNames(
+                            'flex flex-col gap-y-2',
+                        )}>
                             {contestsInfo.map(function (contestInfo) {
                                 return (
                                     <li key={contestInfo.name}>

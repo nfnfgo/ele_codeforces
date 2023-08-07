@@ -37,3 +37,9 @@ let res = await window.electron.ipcRenderer.invoke('storage:eleConfig:getInfo');
 ```
 
 The channel name may based on your storage name or you custom settings when calling `addIpcMainHandler()` method
+
+## Known Issue
+
+**-Storage**
+
+- Storage info can NOT exist any `undefined`, since JSON.parse() is not support parsing `undefined` value

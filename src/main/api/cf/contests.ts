@@ -94,7 +94,8 @@ export async function getHistoryContestInfo(): Promise<HistoryContestInfo[]> {
                 return infoList;
             });
         } catch (e) {
-            throw new Error('Failed to request contest data');
+            throw new Error('Failed to request contest data\n' +
+                `Detail error messgae: ${e}`);
         } finally {
             await cfContestPage.close();
         }

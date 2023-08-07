@@ -17,6 +17,7 @@ import { resolveHtmlPath } from './util';
 
 // ipcMain Exposers
 import 'main/api/cf/exposers';
+import 'main/tools/window_manage/exposers';
 
 // Storage 
 import { EleCFStorage, EleCFStorageConfig } from 'main/storage/ele_storage';
@@ -125,6 +126,7 @@ async function createWindow(): Promise<BrowserWindow> {
 
   win.on('closed', () => {
     win = null;
+    windowInstance.mainWindow = null;
   });
 
   win.webContents.setWindowOpenHandler((edata) => {

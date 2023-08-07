@@ -1,5 +1,8 @@
 import { create } from 'zustand';
 
+// Error
+import * as eleCfErr from 'general/error/base';
+
 
 /** Check if the window (WebAPI) is accessable
  * 
@@ -37,14 +40,14 @@ export function getSystemDarkmodePref(): boolean {
  */
 class ThemeData {
     constructor() {
-        this.darkMode = undefined;
+        this.darkMode = null;
     }
 
     /**
      * Store the darkmode status of the whole site. Could be null when initialized, 
      * null should be considered as follow the system settings
      */
-    darkMode?: boolean = undefined;
+    darkMode?: boolean = null;
 
     /**
      * Returns the darkmode that the app should be now based on the darkMode settings.
@@ -54,7 +57,7 @@ class ThemeData {
      */
 
     getDarkModeNow(): boolean | undefined {
-        if (this.darkMode === undefined) {
+        if (this.darkMode === null) {
             return getSystemDarkmodePref();
         }
         else {
@@ -74,41 +77,49 @@ class ThemeData {
         return this;
     }
 
-    toStorage(): ThemeData {
-        window.localStorage.setItem('darkMode', `${this.darkMode}`);
+    async toStorage(): Promise<ThemeData> {
+        try {
+            await window.electron.ipcRenderer.invoke('storage:eleCfConfig:setInfo', 'theme.darkmode', this.darkMode);
+            window.electron.ipcRenderer.invoke('windowmgr:signal:trigger:refresh');
+        } catch (e) {
+            throw new eleCfErr.EleCFError(
+                'WriteStorageError',
+                'Error occurred when try writing theme data thorugh IPC\n' +
+                `Detail error message: ${e}`
+            );
+        }
         return this;
     }
 
-    fromStorage(): ThemeData {
-        if (typeof window === 'undefined') {
-            console.log('[FailedToReadFromStorage] Can not update theme instance from ' +
-                'storage since WebAPI is not accessable');
-            return this;
+    async fromStorage(): Promise<ThemeData> {
+        let darkmodeInStorage: boolean | null = null;
+        try {
+            darkmodeInStorage = await window.electron.ipcRenderer.invoke('storage:eleCfConfig:getInfo', 'theme.darkmode');
         }
-        let darkModeStr: string | null = window.localStorage.getItem('darkMode');
-        let darkMode: boolean | null;
-        if (darkModeStr !== null) {
-            darkMode = JSON.parse(darkModeStr);
+        catch (e) {
+            throw new eleCfErr.EleCFError(
+                'ReadStorageError',
+                'Error occurred when try reading theme data thorugh IPC\n' +
+                `Detail error message: ${e}`
+            );
         }
-        else {
-            darkMode = null;
-        }
-        this.darkMode = darkMode;
+        this.darkMode = darkmodeInStorage;
         return this;
     }
 }
 
 
 export interface useThemeStoreStateConfig {
-    theme: ThemeData,
-    changeDarkMode: () => (void),
-    setDarkMode: (mode: boolean | null) => (void),
+    theme: ThemeData;
+    changeDarkMode: () => (void);
+    setDarkMode: (mode: boolean | null) => (void);
+    updateDarkModeFromStorage: () => (void);
 }
 
 const useThemeStore = create((set) => ({
     // Create the theme store based on the theme data from storage
     // This can promise the themedata is persistant when switching pages
-    theme: new ThemeData().fromStorage(),
+    theme: new ThemeData(),
     changeDarkMode: () => set((state: useThemeStoreStateConfig) => {
         let oldThemeData: ThemeData = state.theme;
         // Copy a new data
@@ -117,7 +128,7 @@ const useThemeStore = create((set) => ({
         // Notice: if this function has been called, that means the user has 
         // already change the darkmode manually, so the darkMode should no longer 
         // be null
-        if (oldThemeData.darkMode === undefined) {
+        if (oldThemeData.darkMode === null) {
             oldThemeData.darkMode = getSystemDarkmodePref();
         }
         newThemeData.darkMode = !(oldThemeData.getDarkModeNow());
@@ -138,6 +149,17 @@ const useThemeStore = create((set) => ({
             theme: newThemeData,
         }
     }),
+    updateDarkModeFromStorage: function () {
+        window.electron.ipcRenderer.invoke('storage:eleCfConfig:getInfo', 'theme.darkmode').then(
+            function (darkmode) {
+                set(function (state: useThemeStoreStateConfig) {
+                    let newThemeData = new ThemeData().copyWith(state.theme);
+                    newThemeData.darkMode = darkmode;
+                    return { theme: newThemeData };
+                })
+            }
+        );
+    }
 }));
 
 export { useThemeStore, ThemeData };

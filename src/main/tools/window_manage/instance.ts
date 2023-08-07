@@ -98,6 +98,32 @@ class WindowInstance {
             }
         }
     }
+
+    /**
+     * Send info to all windows through IPC
+     * 
+     * Params:
+     * - Check `windowInstanceConfig` for more info
+     */
+    sendToAllWindows({
+        includeMain,
+        channel,
+        props,
+    }
+        : sendToAllWindowsConfig) {
+        // set default
+        if (includeMain === undefined) {
+            includeMain = true;
+        }
+        // send msg
+        for (let win of this.windowsList) {
+            win.instance.webContents.send(channel, ...props);
+        }
+        // send to main if needed
+        if (includeMain === true && this.mainWindow !== null) {
+            this.mainWindow.webContents.send(channel, ...props);
+        }
+    }
 }
 
 export let windowInstance: WindowInstance = new WindowInstance();
@@ -119,30 +145,4 @@ export interface sendToAllWindowsConfig {
      * with a list, e.g.: `props=[{a: 1, b: 2}]`
      */
     props: any[];
-}
-
-/**
- * Send info to all windows through IPC
- * 
- * Params:
- * - Check `windowInstanceConfig` for more info
- */
-export function sendToAllWindows({
-    includeMain,
-    channel,
-    props,
-}
-    : sendToAllWindowsConfig) {
-    // set default
-    if (includeMain === undefined) {
-        includeMain = true;
-    }
-    // send msg
-    for (let win of windowInstance.windowsList) {
-        win.instance.webContents.send(channel, ...props);
-    }
-    // send to main if needed
-    if (includeMain === true) {
-        windowInstance.mainWindow.webContents.send(channel, ...props);
-    }
 }

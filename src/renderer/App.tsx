@@ -12,6 +12,9 @@ import { ThemeData, useThemeStore, useThemeStoreStateConfig } from 'renderer/sto
 // Pages 
 import { HomePage } from 'renderer/pages/home/page';
 import { ProblemDetailedPanel } from 'renderer/pages/home/problem_detail_panel';
+import { SettingsPage } from 'renderer/pages/settings/page';
+
+// Tools
 import { updateDarkModeUIFromStorage } from './tools/darkmode';
 
 export default function App() {
@@ -22,9 +25,7 @@ export default function App() {
 
   let routes = (<Routes>
     <Route path="/" element={<HomePage />} />
-    <Route path="/contest" element={<>
-      <ProblemDetailedPanel contestId={1854} problemId='A1' />
-    </>} />
+    <Route path='/settings' element={<SettingsPage></SettingsPage>} />
   </Routes>);
 
   return (

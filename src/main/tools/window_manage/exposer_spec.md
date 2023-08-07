@@ -8,3 +8,9 @@ windowmgr:open:settings
 
 windowName: 
 - setttings
+
+**-Signal**
+
+**--Trigger Refresh** `windowmgr:signal:trigger:refresh`
+
+**--Receive Refresh** `windowmgr:signal:refresh`

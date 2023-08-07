@@ -146,7 +146,7 @@ export class EleCFStorage {
                     eval(`${curPropName} = {}`);
                 }
             }
-            eval(`${curPropName} = JSON.parse(${JSON.stringify(info)})`);
+            eval(`${curPropName} = ${JSON.stringify(info)}`);
         } catch (e) {
             throw new errs.EleCFError(
                 'StorageInfoWriteError',

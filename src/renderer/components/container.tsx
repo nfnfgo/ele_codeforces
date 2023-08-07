@@ -16,6 +16,10 @@ interface ContainerConfig {
     rounded?: boolean;
     expand?: boolean;
     id?: string;
+    /**
+     * If true, this container will apply the basic selected pattern
+     */
+    selected?: boolean;
 }
 
 /**
@@ -34,6 +38,7 @@ export function Container({
     hasHoverColorTrans,
     rounded,
     expand,
+    selected,
     id,
 }: ContainerConfig) {
     // Classname default to empty string
@@ -62,6 +67,14 @@ export function Container({
     if (expand === undefined) {
         expand = false;
     }
+    if (selected === undefined) {
+        selected = false;
+    }
+
+    // Container can't have default color when selected
+    if (selected === true) {
+        hasColor = false;
+    }
 
     return (
         <>
@@ -70,6 +83,7 @@ export function Container({
                 className={classNames(
                     'flex min-w-0 min-h-0 overflow-hidden',
                     hasColor ? 'bg-fgcolor dark:bg-fgcolor-dark' : '',
+                    selected ? 'bg-primary text-white' : '',
                     hasShadow ? 'shadow-lg' : '',
                     rounded ? 'rounded-lg' : '',
                     expand ? 'h-full w-full' : '',
@@ -140,7 +154,9 @@ export function FlexDiv({
         </>);
 }
 
-
+/**
+ * Center child component at the center of the parent component of this center component
+ */
 export function Center({ children, className }: { children: React.ReactNode, className?: string }) {
     return (
         <FlexDiv className={classNames(
@@ -151,3 +167,4 @@ export function Center({ children, className }: { children: React.ReactNode, cla
             {children}
         </FlexDiv>);
 }
+
