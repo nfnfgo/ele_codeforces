@@ -7,7 +7,7 @@ import * as eleCfErr from 'general/error/base';
  * Data class for codeforces account info
  */
 export class AccountData {
-    constructor(account?: string, password?: string) {
+    constructor(account?: string | null, password?: string | null) {
         if (account === undefined) {
             account = null;
         }

@@ -1,6 +1,11 @@
-- WorkOn: Settings page.
-- WorkOn: Codeforces Account API
+- WorkOn: Complete account API and exposers
+- WorkOn: Settings page
 
+## 0.1.2
+
+- Update: Add codeforces login API
+- Update: Add `setDefault`
+- Update: Enable typescript strict null check
 
 ## 0.1.1
 

@@ -47,7 +47,7 @@ class ThemeData {
      * Store the darkmode status of the whole site. Could be null when initialized, 
      * null should be considered as follow the system settings
      */
-    darkMode?: boolean = null;
+    darkMode?: boolean | null = null;
 
     /**
      * Returns the darkmode that the app should be now based on the darkMode settings.
