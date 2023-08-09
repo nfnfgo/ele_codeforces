@@ -17,6 +17,9 @@ import { Link } from 'react-router-dom';
 import { useThemeStore, useThemeStoreStateConfig } from 'renderer/stores/themeStore';
 
 export function AppearanceSettingBlock() {
+    let curDarkmode = useThemeStore(function (state: useThemeStoreStateConfig) {
+        return state.theme.darkMode;
+    });
     let setDarkModeStore = useThemeStore(function (state: useThemeStoreStateConfig) {
         return state.setDarkMode;
     });
@@ -34,6 +37,7 @@ export function AppearanceSettingBlock() {
             )}>
                 <SelectionSettingTile
                     title='DarkMode'
+                    defaultValue={curDarkmode}
                     selections={
                         [
                             {

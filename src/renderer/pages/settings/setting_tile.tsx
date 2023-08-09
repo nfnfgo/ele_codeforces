@@ -10,12 +10,13 @@ import { Background } from 'renderer/components/general/background';
 import { classNames } from 'renderer/tools/css_tools';
 import { Link } from 'react-router-dom';
 import { GoogleIcon } from 'renderer/components/icons/gicon';
+import { setDefault } from 'general/tools/set_default';
 
 
 /**
  * Layout compoenent for setting tiles
  */
-function SettingTileLayout({
+export function SettingTileLayout({
     left,
     right,
 }: {
@@ -117,4 +118,55 @@ export function SelectionSettingTile({
                 </>
             )}
         />);
+}
+
+
+export interface InputSettingTileConfig {
+    /**Title of this setting tile */
+    title: string;
+    /**
+     * Type of the input field
+     * 
+     * Must be a valid type for standard HTML `<input>` tag
+     */
+    type?: string;
+    /**Default value of this string */
+    defaultValue?: string;
+    /**
+     * Callback function when value of the input changed
+     */
+    onChanged?: (value: string) => (any);
+}
+
+export function InputSettingTile({
+    title,
+    defaultValue,
+    type,
+    onChanged,
+}: InputSettingTileConfig) {
+    // set default
+    defaultValue = setDefault(defaultValue, '');
+    onChanged = setDefault(onChanged, function (value) { });
+    type = setDefault(type, 'text');
+
+    return (
+        <SettingTileLayout
+            left={(<p>{title}</p>)}
+            right={(
+                <input
+                    type={type}
+                    placeholder={defaultValue}
+                    onChange={function (e) {
+                        onChanged!(e.target.value);
+                    }}
+                    className={classNames(
+                        'rounded-lg',
+                        'px-2 py-1',
+                        'bg-black/5 dark:bg-white/10',
+                        'focus-visible:outline-none',
+                        'focus-visible:shadow-lg focus-visible:shadow-black/20 transition-shadow'
+                    )}></input>
+            )}
+        />
+    );
 }

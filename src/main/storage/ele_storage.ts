@@ -3,6 +3,10 @@ import path from 'path';
 import { app } from 'electron';
 import { ipcMain } from 'electron';
 
+// Tools
+import { setDefault } from 'general/tools/set_default';
+import * as file from 'general/tools/file';
+
 // errors
 import * as errs from 'general/error/base';
 
@@ -135,7 +139,9 @@ export class EleCFStorage {
      * - Do NOT pass uncheck or unsecure params to info, since 
      * this method use `eval()` to add info to the storage jsonInfo
      */
-    setInfo(propName: string, info: any) {
+    setInfo(propName: string, info: any, writeToStorage?: boolean) {
+        // set default
+        writeToStorage = setDefault(writeToStorage, true);
         try {// reach the propName
             let propList = propName.split('.');
             let curPropName = `this.jsonInfo`;
@@ -147,6 +153,19 @@ export class EleCFStorage {
                 }
             }
             eval(`${curPropName} = ${JSON.stringify(info)}`);
+            if (writeToStorage === true) {
+                let jsonFileDirPath = path.join(
+                    app.getPath('userData'),
+                    'config',
+                );
+                let jsonFilePath = path.join(
+                    app.getPath('userData'),
+                    'config',
+                    `${this.storageName}.json`,
+                );
+                file.createDirIfNotExist(jsonFileDirPath);
+                file.writeOrUpdateFile(jsonFilePath, JSON.stringify(this.jsonInfo));
+            }
         } catch (e) {
             throw new errs.EleCFError(
                 'StorageInfoWriteError',

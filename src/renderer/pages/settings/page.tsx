@@ -16,9 +16,11 @@ import { settingCategoryList } from './settings_data';
 
 // Settings Blocks
 import { AppearanceSettingBlock } from './appearance_settings';
+import { AccountSettingBlock } from './account_settings';
 
 const settingsBlockMap = {
-    'Appearance': <AppearanceSettingBlock></AppearanceSettingBlock>
+    'Appearance': <AppearanceSettingBlock></AppearanceSettingBlock>,
+    'Account': <AccountSettingBlock></AccountSettingBlock>,
 };
 
 /**
@@ -114,8 +116,13 @@ function SettingsCategoryTitle({
     return (<>
         <button
             className='w-full'
+            onMouseDown={function () {
+                console.log('md');
+                onClick!(title);
+            }}
             onClick={function () {
-                onClick(title);
+                console.log('onclick');
+                onClick!(title);
             }}>
             <Container
                 className={classNames(

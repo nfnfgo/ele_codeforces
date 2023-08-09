@@ -23,7 +23,7 @@ export default function App() {
     updateDarkModeUIFromStorage();
   }, []);
 
-  let routes = (<Routes>
+  let routes = (<Routes location={'/settings'}>
     <Route path="/" element={<HomePage />} />
     <Route path='/settings' element={<SettingsPage></SettingsPage>} />
   </Routes>);

@@ -92,17 +92,23 @@ export class AccountData {
             );
         }
     }
+
+    fromProps(props: any) {
+        ;
+    }
 }
 
 export interface useAccountStoreConfig {
     /**`AccountData` instance which stores user's account data */
     accountData: AccountData;
     /**
-     * Try login into codeforces using received account info
+     * Replace the `accountData` to a totally new data
      * 
-     * If succceed, return `true` and update state, else, return `false`
+     * Notice:
+     * - Will NOT notify listeners if the new data is the same instance to the 
+     * old one (even if the props has been changed)
      */
-    tryLogin: (account: string, password: string) => Promise<boolean>;
+    updateAccountData: (newAccountData: AccountData) => void;
 }
 
 
@@ -113,10 +119,14 @@ export const useAccountStore = create(
     function (set) {
         let storeInfo: useAccountStoreConfig = {
             accountData: new AccountData(),
-            async tryLogin(account, password) {
-                return false;
+            updateAccountData(newAccountData) {
+                set(function () {
+                    return {
+                        accountData: newAccountData,
+                    };
+                });
             },
         }
-
+        return storeInfo;
     }
 );
