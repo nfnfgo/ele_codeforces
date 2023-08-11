@@ -121,6 +121,7 @@ export const useAccountStore = create(
             accountData: new AccountData(),
             updateAccountData(newAccountData) {
                 set(function () {
+                    newAccountData.toStorage();
                     return {
                         accountData: newAccountData,
                     };

@@ -94,7 +94,7 @@ async function createWindow(): Promise<BrowserWindow> {
     return path.join(RESOURCES_PATH, ...paths);
   };
 
-  let win = new BrowserWindow({
+  let win: BrowserWindow | null = new BrowserWindow({
     show: false,
     width: 1024,
     height: 728,

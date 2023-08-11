@@ -1,6 +1,6 @@
 
 // Fundamentals
-import React from "react";
+import React, { CSSProperties } from "react";
 
 // Tools
 import { classNames } from "renderer/tools/css_tools";
@@ -16,6 +16,8 @@ interface ContainerConfig {
     rounded?: boolean;
     expand?: boolean;
     id?: string;
+    /**Custom CSS style */
+    style?: CSSProperties;
     /**
      * If true, this container will apply the basic selected pattern
      */
@@ -38,6 +40,7 @@ export function Container({
     hasHoverColorTrans,
     rounded,
     expand,
+    style,
     selected,
     id,
 }: ContainerConfig) {
@@ -70,6 +73,9 @@ export function Container({
     if (selected === undefined) {
         selected = false;
     }
+    if (style === undefined) {
+        style = undefined;
+    }
 
     // Container can't have default color when selected
     if (selected === true) {
@@ -88,7 +94,8 @@ export function Container({
                     rounded ? 'rounded-lg' : '',
                     expand ? 'h-full w-full' : '',
                     className,
-                )}>
+                )}
+                style={style as CSSProperties}>
                 <div className={classNames(
                     'flex flex-auto h-full w-full min-w-0 min-h-0',
                     hasHoverColor ? 'hover:bg-black/5 dark:hover:bg-white/5' : '',
@@ -118,6 +125,7 @@ interface FlexDivConfig {
      * the height and width limit of it's parent and acted as an overflow content
      */
     clearMinLimit?: boolean,
+    style?: CSSProperties,
 }
 
 export function FlexDiv({
@@ -126,6 +134,7 @@ export function FlexDiv({
     className,
     expand,
     clearMinLimit,
+    style,
 }: FlexDivConfig) {
     if (className === undefined) {
         className = '';
@@ -148,7 +157,8 @@ export function FlexDiv({
                     expand ? 'h-full w-full' : '',
                     className,
                 )}
-                id={id}>
+                id={id}
+                style={style}>
                 {children}
             </div>
         </>);

@@ -1,49 +1,61 @@
 export const codeforcesLevelsData: LevelInfo[] = [{
     "levelName": "Newbie",
     "lowestRatings": 0,
-    "highestRatings": 1199
+    "highestRatings": 1199,
+    "color": "#808080",
 }, {
     "levelName": "Pupil",
     "lowestRatings": 1200,
-    "highestRatings": 1399
+    "highestRatings": 1399,
+    "color": '#008000',
 }, {
     "levelName": "Specialist",
     "lowestRatings": 1400,
-    "highestRatings": 1599
+    "highestRatings": 1599,
+    "color": '#03A89E',
 }, {
     "levelName": "Expert",
     "lowestRatings": 1600,
-    "highestRatings": 1899
+    "highestRatings": 1899,
+    "color": '#0000FF',
 }, {
     "levelName": "Candidate Master",
     "lowestRatings": 1900,
-    "highestRatings": 2099
+    "highestRatings": 2099,
+    "color": '#800080',
 }, {
     "levelName": "Master",
     "lowestRatings": 2100,
-    "highestRatings": 2299
+    "highestRatings": 2299,
+    "color": '#FFA500',
 }, {
     "levelName": "International Master",
     "lowestRatings": 2300,
-    "highestRatings": 2399
+    "highestRatings": 2399,
+    "color": '#FFA500',
 }, {
     "levelName": "Grandmaster",
     "lowestRatings": 2400,
-    "highestRatings": 2599
+    "highestRatings": 2599,
+    "color": '#FF0000',
 }, {
     "levelName": "International Grandmaster",
     "lowestRatings": 2600,
-    "highestRatings": 2999
+    "highestRatings": 2999,
+    "color": '#FF0000',
 }, {
     "levelName": "Legendary Grandmaster",
     "lowestRatings": 3000,
-    "highestRatings": 99999
+    "highestRatings": 99999,
+    "color": '#FF0000',
 }]
 
 export interface LevelInfo {
     levelName: string;
     lowestRatings: number;
     highestRatings: number;
+    /**Represent color of this level, e.g.: `#808080` */
+    color: string;
 }
 
 export interface getLevelInfoByRatingsReturns {

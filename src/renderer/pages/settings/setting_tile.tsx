@@ -155,7 +155,7 @@ export function InputSettingTile({
             right={(
                 <input
                     type={type}
-                    placeholder={defaultValue}
+                    defaultValue={defaultValue}
                     onChange={function (e) {
                         onChanged!(e.target.value);
                     }}
