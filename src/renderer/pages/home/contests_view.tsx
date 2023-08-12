@@ -21,8 +21,8 @@ import { ProblemDetailedInfo, ProblemInfo, getProblemDetailConfig } from 'main/a
 
 export function CFContestsView() {
 
-    let [contestsInfo, setContestsInfo] = useState([]);
-    let [hisContestInfo, setHisContestInfo] = useState([]);
+    let [contestsInfo, setContestsInfo] = useState<ContestInfo[]>([]);
+    let [hisContestInfo, setHisContestInfo] = useState<HistoryContestInfo[]>([]);
     // Store the contest id which user manually selected
     let [selectedContestId, setSelectedContestId] = useState<number | undefined>(undefined);
 
@@ -195,7 +195,7 @@ function CFContestDetailPanel({ contestId }: { contestId: number }) {
                 {/* Problem Detailed Info Part */}
                 <ProblemDetailedPanel
                     contestId={selectedContestId}
-                    problemId={selectedProblemId}
+                    problemId={selectedProblemId ?? ''}
                 />
             </FlexDiv>
         </FlexDiv>

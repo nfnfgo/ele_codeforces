@@ -62,7 +62,7 @@ export function openNewWindow({
         return path.join(RESOURCES_PATH, ...paths);
     };
 
-    let newWindow = new BrowserWindow({
+    let newWindow: BrowserWindow | null = new BrowserWindow({
         show: false,
         width: 1024,
         height: 728,
@@ -94,7 +94,12 @@ export function openNewWindow({
 
     newWindow.on('closed', () => {
         newWindow = null;
-        onWindowClosed();
+        if (onWindowClosed === undefined) {
+            ;
+        }
+        else {
+            onWindowClosed();
+        }
     });
 
     newWindow.webContents.setWindowOpenHandler(generalWindowOpenHandler);

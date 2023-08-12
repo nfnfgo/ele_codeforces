@@ -109,25 +109,40 @@ export interface useAccountStoreConfig {
      * old one (even if the props has been changed)
      */
     updateAccountData: (newAccountData: AccountData) => void;
+    /**
+     * Automatically read the data from storage package and update current state
+     */
+    updateAccountDataFromStorage: () => Promise<void>;
 }
 
 
 /**
  * Store provide some codeforces account info and data
  */
-export const useAccountStore = create(
-    function (set) {
-        let storeInfo: useAccountStoreConfig = {
-            accountData: new AccountData(),
-            updateAccountData(newAccountData) {
-                set(function () {
-                    newAccountData.toStorage();
-                    return {
-                        accountData: newAccountData,
-                    };
-                });
-            },
+export const useAccountStore = create(function (set) {
+    let storeInfo: useAccountStoreConfig = {
+        accountData: new AccountData(),
+        updateAccountData(newAccountData) {
+            set(function () {
+                newAccountData.toStorage();
+                return {
+                    accountData: newAccountData,
+                };
+            });
+        },
+        async updateAccountDataFromStorage() {
+            let newAccData = await (new AccountData()).fromStorage();
+            set(() => ({ accountData: newAccData }));
         }
-        return storeInfo;
     }
+    // add ipcRenderer refresh listener
+    try {
+        window.electron.ipcRenderer.on('windowmgr:signal:refresh', function () {
+            storeInfo.updateAccountDataFromStorage();
+        });
+    } catch (e) {
+        ;
+    }
+    return storeInfo;
+}
 );

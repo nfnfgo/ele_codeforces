@@ -116,50 +116,57 @@ export interface useThemeStoreStateConfig {
     updateDarkModeFromStorage: () => (void);
 }
 
-const useThemeStore = create((set) => ({
-    // Create the theme store based on the theme data from storage
-    // This can promise the themedata is persistant when switching pages
-    theme: new ThemeData(),
-    changeDarkMode: () => set((state: useThemeStoreStateConfig) => {
-        let oldThemeData: ThemeData = state.theme;
-        // Copy a new data
-        let newThemeData: ThemeData = new ThemeData().copyWith(oldThemeData);
-        // Update the darkMode param in the new themedata
-        // Notice: if this function has been called, that means the user has 
-        // already change the darkmode manually, so the darkMode should no longer 
-        // be null
-        if (oldThemeData.darkMode === null) {
-            oldThemeData.darkMode = getSystemDarkmodePref();
-        }
-        newThemeData.darkMode = !(oldThemeData.getDarkModeNow());
-        // also need to update the localStorage
-        newThemeData.toStorage();
-        // Returns the new state
-        return {
-            theme: newThemeData,
-        };
-    }),
-    setDarkMode: (mode?: boolean) => set((state: useThemeStoreStateConfig) => {
-        let oldThemeData: ThemeData = state.theme;
-        // Copy a new data
-        let newThemeData: ThemeData = new ThemeData().copyWith(oldThemeData);
-        newThemeData.darkMode = mode;
-        newThemeData.toStorage();
-        return {
-            theme: newThemeData,
-        }
-    }),
-    updateDarkModeFromStorage: function () {
-        window.electron.ipcRenderer.invoke('storage:eleCfConfig:getInfo', 'theme.darkmode').then(
-            function (darkmode) {
-                set(function (state: useThemeStoreStateConfig) {
-                    let newThemeData = new ThemeData().copyWith(state.theme);
-                    newThemeData.darkMode = darkmode;
-                    return { theme: newThemeData };
-                })
+const useThemeStore = create(function (set) {
+    let themeStoreInfo: useThemeStoreStateConfig = ({
+        // Create the theme store based on the theme data from storage
+        // This can promise the themedata is persistant when switching pages
+        theme: new ThemeData(),
+        changeDarkMode: () => set((state: useThemeStoreStateConfig) => {
+            let oldThemeData: ThemeData = state.theme;
+            // Copy a new data
+            let newThemeData: ThemeData = new ThemeData().copyWith(oldThemeData);
+            // Update the darkMode param in the new themedata
+            // Notice: if this function has been called, that means the user has 
+            // already change the darkmode manually, so the darkMode should no longer 
+            // be null
+            if (oldThemeData.darkMode === null) {
+                oldThemeData.darkMode = getSystemDarkmodePref();
             }
-        );
-    }
-}));
+            newThemeData.darkMode = !(oldThemeData.getDarkModeNow());
+            // also need to update the localStorage
+            newThemeData.toStorage();
+            // Returns the new state
+            return {
+                theme: newThemeData,
+            };
+        }),
+        setDarkMode: (mode: boolean | null) => set((state: useThemeStoreStateConfig) => {
+            let oldThemeData: ThemeData = state.theme;
+            // Copy a new data
+            let newThemeData: ThemeData = new ThemeData().copyWith(oldThemeData);
+            newThemeData.darkMode = mode;
+            newThemeData.toStorage();
+            return {
+                theme: newThemeData,
+            }
+        }),
+        updateDarkModeFromStorage: function () {
+            window.electron.ipcRenderer.invoke('storage:eleCfConfig:getInfo', 'theme.darkmode').then(
+                function (darkmode) {
+                    set(function (state: useThemeStoreStateConfig) {
+                        let newThemeData = new ThemeData().copyWith(state.theme);
+                        newThemeData.darkMode = darkmode;
+                        return { theme: newThemeData };
+                    })
+                }
+            );
+        }
+    });
+    // add ipcRenderer refresh listener
+    window.electron.ipcRenderer.on('windowmgr:signal:refresh', function () {
+        themeStoreInfo.updateDarkModeFromStorage();
+    });
+    return themeStoreInfo;
+});
 
 export { useThemeStore, ThemeData };

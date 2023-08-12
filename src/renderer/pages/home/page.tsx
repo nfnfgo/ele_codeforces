@@ -16,6 +16,7 @@ import { Link } from 'react-router-dom';
 import { ContestInfo } from 'main/api/cf/contests';
 import { openNewWindowConfig } from 'main/tools/window_opener';
 
+
 export function HomePage() {
 
     return (

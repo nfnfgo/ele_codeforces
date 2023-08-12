@@ -27,6 +27,14 @@ import { logInCfAccountConfig } from 'main/api/cf/account';
  * Account setting block
  */
 export function AccountSettingBlock() {
+    let updateAccountDataFromStorage = useAccountStore(function (state: useAccountStoreConfig) {
+        return state.updateAccountDataFromStorage;
+    });
+
+    useEffect(function () {
+        updateAccountDataFromStorage();
+    }, []);
+
     return (
         <FlexDiv
             expand={true}
@@ -204,8 +212,11 @@ function AccountInfoBlock() {
                         'justify-center items-center',
                         'text-black/50 dark:text-white/50',
                         'flex-col gap-y-2',
+                        'rounded-lg hover:bg-black/5 dark:hover:bg-white/5',
                     )}>
-                        <p>No account has logged in</p>
+                        <p className={classNames(
+                            'group-hover/no-account-login:font-bold transition-all',
+                        )}>No account has logged in</p>
                         <p className={classNames(
                             'h-0 group-hover/no-account-login:h-[3rem]',
                             'opacity-0 group-hover/no-account-login:opacity-100',

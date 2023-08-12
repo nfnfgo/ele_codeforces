@@ -39,25 +39,19 @@ export function Background({
         fullScreen = true;
     }
     // use darkmode state
-    const curDarkmode: boolean | undefined = useThemeStore(function (state) {
-        return (state as useThemeStoreStateConfig).theme.darkMode;
+    const curDarkmode: boolean | null = useThemeStore(function (state) {
+        return (state as useThemeStoreStateConfig).theme.darkMode as (boolean | null);
     });
     let updateDarkmodeFromStorage = useThemeStore(function (state) {
         return (state as useThemeStoreStateConfig).updateDarkModeFromStorage;
     });
     // refresh when darkmode changed
     useEffect(function () {
-        console.log('Background darkmode updated');
         setUIDarkMode(curDarkmode);
     }, [curDarkmode]);
 
     useEffect(function () {
-        console.log('Updating darkmode from storage');
         updateDarkmodeFromStorage();
-        // Refresh from the storage when receive a refresh signal from ipcMain
-        window.electron.ipcRenderer.on('windowmgr:signal:refresh', function () {
-            updateDarkmodeFromStorage();
-        });
     }, []);
 
     return (<FlexDiv
@@ -65,6 +59,7 @@ export function Background({
             fullScreen ? 'flex-none w-screen h-screen' : '',
             'text-black dark:text-white',
             'bg-bgcolor dark:bg-bgcolor-dark',
+            'select-none',
             className,
         )}>
         {children}

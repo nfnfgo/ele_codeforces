@@ -1,3 +1,11 @@
+## Known Issue
+
+Event handler of `ipcRenderer.on('windowmgr:signal:refresh')` has triggered 
+theme update more than one time in `Background` component, causes unneeded refresh. 
+Maybe need to make the same callback be added to the emitter only one time.
+
+## WorkOn
+
 - WorkOn: Complete account API and exposers
 - WorkOn: Settings page
 

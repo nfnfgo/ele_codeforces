@@ -5,8 +5,6 @@ import './App.css';
 // Fundamentals
 import { useLayoutEffect } from 'react';
 
-// Stores
-import { ThemeData, useThemeStore, useThemeStoreStateConfig } from 'renderer/stores/themeStore';
 
 
 // Pages 
@@ -23,7 +21,7 @@ export default function App() {
     updateDarkModeUIFromStorage();
   }, []);
 
-  let routes = (<Routes location={'/settings'}>
+  let routes = (<Routes>
     <Route path="/" element={<HomePage />} />
     <Route path='/settings' element={<SettingsPage></SettingsPage>} />
   </Routes>);

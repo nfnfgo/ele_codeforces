@@ -21,7 +21,7 @@ export function getSystemDarkmodePref(): boolean {
  * - If `darkmode` received `undefined`, then setting the darkmode 
  * based on system pref
  */
-export function setUIDarkMode(darkmode?: boolean) {
+export function setUIDarkMode(darkmode: boolean | null) {
     if (darkmode === null) {
         darkmode = getSystemDarkmodePref();
     }
