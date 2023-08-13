@@ -13,6 +13,13 @@ export class CFBrowser {
         if (this.browser === undefined) {
             this.browser = await puppeteer.launch({ headless: "new" });
         }
+        // console.log('Browser has been got');
+        // (this.browser as Browser).pages().then(function (arr) {
+        //     console.log(`Total Page Count: ${arr.length}`)
+        //     for (let page of arr) {
+        //         console.log(page.url());
+        //     }
+        // })
         return this.browser;
     }
 }

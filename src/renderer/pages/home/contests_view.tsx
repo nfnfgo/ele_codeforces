@@ -10,6 +10,7 @@ import { CFContestCard, CFHistoryContestCard } from 'renderer/components/cf/cont
 import { HeadTitle, Title } from 'renderer/components/general/title';
 import { CFProblemInfoBlock } from 'renderer/components/cf/contest/problem_info_block';
 import { ProblemDetailedPanel } from './problem_detail_panel';
+import { GoogleIcon } from 'renderer/components/icons/gicon';
 
 // Tools
 import { classNames } from 'renderer/tools/css_tools';
@@ -25,6 +26,8 @@ export function CFContestsView() {
     let [hisContestInfo, setHisContestInfo] = useState<HistoryContestInfo[]>([]);
     // Store the contest id which user manually selected
     let [selectedContestId, setSelectedContestId] = useState<number | undefined>(undefined);
+    // If user prefer to hide the contest list
+    let [hideContestList, setHideContestList] = useState<boolean>(false);
 
     useEffect(function () {
         window.electron.ipcRenderer.invoke('api:cf:getContestList').then(function (value: ContestInfo[]) {
@@ -42,14 +45,51 @@ export function CFContestsView() {
             className={classNames(
                 'flex-row relative'
             )}>
+            {/* Contest List Part */}
             <FlexDiv
                 id='contestList'
                 className={classNames(
-                    'flex-col min-w-[15rem] max-w-[25rem]',
-                    'flex-auto h-full w-[10rem]',
+                    'group/contest-list',
+                    'z-[10]',
+                    'flex-col',
+                    'flex-none h-full w-[22rem]',
                     'gap-y-2',
                     'overflow-auto',
+                    hideContestList ? 'absolute left-0' : '',
+                    hideContestList ? 'shadow-xl' : '',
+                    hideContestList ? 'translate-x-[-19rem] hover:translate-x-[0rem]' : '',
+                    hideContestList ? 'opacity-0 hover:opacity-100' : '',
+                    hideContestList ? 'backdrop-blur-xl' : '',
+                    'transition-all ease-out',
                 )}>
+                {/* Hide/Show Contest List Button */}
+                <FlexDiv className={classNames(
+                    hideContestList ? 'sticky ml-[19rem]' : 'absolute left-[19rem]',
+                    'top-[0.5rem] z-[100]',
+                    'transition-all ease-out'
+                )}>
+                    <button
+                        onClick={function () {
+                            setHideContestList(!hideContestList);
+                        }}>
+                        <Container
+                            className={classNames(
+                                'transition-all ease-out',
+                                'flex-none h-[2rem] w-[2rem]'
+                            )}
+                            selected={!hideContestList}>
+                            <FlexDiv
+                                expand={true}
+                                className={classNames(
+                                    'flex-row justify-center items-center',
+                                )}>
+                                <GoogleIcon>
+                                    push_pin
+                                </GoogleIcon>
+                            </FlexDiv>
+                        </Container>
+                    </button>
+                </FlexDiv>
                 <FlexDiv className={classNames(
                     'flex-col',
                     'ml-2'
@@ -114,7 +154,7 @@ export function CFContestsView() {
                     />);
                 }()}
             </FlexDiv>
-        </FlexDiv>);
+        </FlexDiv >);
 }
 
 
@@ -151,6 +191,7 @@ function CFContestDetailPanel({ contestId }: { contestId: number }) {
     return (
         <FlexDiv className={classNames(
             'relative flex-col',
+            'w-full',
         )}
             expand={true}>
             <FlexDiv
