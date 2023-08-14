@@ -15,7 +15,7 @@ export function HeadTitle({
     return (<h2 className={classNames(
         'text-2xl font-bold',
         hasColor ? 'bg-bgcolor dark:bg-bgcolor-dark' : '',
-        className
+        className ?? '',
     )}>{children}</h2>);
 }
 

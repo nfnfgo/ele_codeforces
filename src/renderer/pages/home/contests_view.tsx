@@ -96,10 +96,10 @@ export function CFContestsView() {
                 )}>
                     <div>
                         <HeadTitle className={classNames(
-                            'px-1 py-2',
+                            'px-1 py-2 backdrop-blur-sm',
                             'sticky top-0'
                         )}
-                            hasColor={true}>Upcoming Round</HeadTitle>
+                            hasColor={false}>Upcoming Round</HeadTitle>
                         <ul className={classNames(
                             'flex flex-col gap-y-2',
                         )}>
@@ -114,10 +114,12 @@ export function CFContestsView() {
                     </div>
                     <div>
                         <HeadTitle className={classNames(
-                            'px-1 py-2',
+                            'px-1 py-2 backdrop-blur-sm',
                             'sticky top-0'
                         )}
-                            hasColor={true}>History Round</HeadTitle>
+                            hasColor={false}>
+                            History Round
+                        </HeadTitle>
                         <ul className={classNames(
                             'flex flex-col gap-y-2',
                         )}>

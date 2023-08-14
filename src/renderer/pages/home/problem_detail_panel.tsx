@@ -13,6 +13,7 @@ import { GoogleIcon } from 'renderer/components/icons/gicon';
 
 // Tools
 import { classNames } from 'renderer/tools/css_tools';
+import { setDefault } from 'general/tools/set_default';
 
 // Models
 import { ContestInfo, HistoryContestInfo } from 'main/api/cf/contests';
@@ -112,7 +113,7 @@ export function ProblemDetailedPanel({
                         </Container>
                         <FlexDiv className={classNames(
                             'w-full px-4 py-2',
-                            'sticky bottom-[2rem]',
+                            'sticky bottom-[4rem]',
                         )}>
                             <ProblemOperationBar
                                 contestId={contestId}
@@ -125,6 +126,12 @@ export function ProblemDetailedPanel({
     </>);
 }
 
+/**
+ * Operation bar component for user to execute operation about problems 
+ * like submit
+ * 
+ * Usually inside ProblemDetailPanel
+ */
 function ProblemOperationBar({
     contestId,
     problemId,
@@ -135,11 +142,90 @@ function ProblemOperationBar({
     return (
         <Container
             hasColor={false}
+            rounded={false}
             className={classNames(
                 'w-full h-fit',
-                'backdrop-blur-lg',
+                'rounded-full',
+                'backdrop-blur-lg shadow-lg',
+                'bg-white/50 dark:bg-black/50',
             )
             }>
-            123
+            {/* Buttons Part */}
+            <FlexDiv
+                expand={true}
+                className={classNames(
+                    'flex-row justify-end gap-x-2',
+                    'py-2 px-2'
+                )}>
+                {/* Tutorial */}
+                <ProblemOptBarButton
+                iconName='collections_bookmark'>
+                    Problem Tutorial
+                </ProblemOptBarButton>
+                {/* Copy Input */}
+                <ProblemOptBarButton
+                iconName='content_cut'>
+                    Copy Example
+                </ProblemOptBarButton>
+                {/* Submit Button */}
+                <ProblemOptBarButton
+                    isPrimary={true}
+                    iconName='send'>
+                    Clipboard Submit
+                </ProblemOptBarButton>
+            </FlexDiv>
         </Container>);
+}
+
+interface ProblemOptBarButtonConfig {
+    /**Callback function when button clicked */
+    onClick?: () => (any);
+    /**If ture, will set primary style and color for this button */
+    isPrimary?: boolean;
+    /**The google symbol name of the icon, could be undefined */
+    iconName?: string;
+    children: React.ReactNode;
+}
+
+function ProblemOptBarButton({
+    onClick,
+    isPrimary,
+    iconName,
+    children,
+}: ProblemOptBarButtonConfig) {
+    // set deafault
+    onClick = setDefault(onClick, function () { });
+    isPrimary = setDefault(isPrimary, false);
+    return (<>
+        <button onClick={onClick}>
+            <Container
+                hasColor={false}
+                hasHoverColor={true}
+                rounded={false}
+                className={classNames(
+                    isPrimary ? 'bg-primary text-white' : '',
+                    'rounded-full',
+                )}>
+                <FlexDiv className={classNames(
+                    'mx-4 my-2',
+                    'flex-row justify-center items-center'
+                )}>
+                    {function () {
+                        if (iconName === undefined) {
+                            ;
+                        }
+                        else {
+                            return (
+                                <GoogleIcon className={classNames(
+                                    'mr-2'
+                                )}>
+                                    {iconName}
+                                </GoogleIcon>);
+                        }
+                    }()}
+                    {children}
+                </FlexDiv>
+            </Container>
+        </button>
+    </>);
 }

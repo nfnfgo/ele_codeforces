@@ -16,6 +16,7 @@ module.exports = {
       'red': '#dc2626',
       'red-light': '#f87171',
       'black': '#020617',
+      'transparent': 'rgba(0,0,0,0)',
     },
     extend: {},
   },

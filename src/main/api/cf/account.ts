@@ -10,7 +10,7 @@ import * as cfConfig from './config';
 import * as errs from 'general/error/base';
 
 // Models
-import { AccountData } from 'renderer/stores/accountStore';
+// import { AccountData } from 'renderer/stores/accountStore';
 
 /**
  * Check if there is an account logged into codeforces website in puppeteer
@@ -109,15 +109,14 @@ async function logoutAccount(cfPage: Page, checkStatus?: boolean): Promise<void>
  * 
  * The param meaning is same to `accountStore` in renderer process
  */
-// export interface AccountInfo {
-//     account: string;
-//     password: string;
-//     handle: string;
-//     ratings: number;
-//     levelName: string;
-//     avatarUrl: string;
-
-// }
+export interface AccountInfo {
+    account?: string;
+    password?: string;
+    handle: string;
+    ratings: number;
+    levelName: string;
+    avatarUrl: string;
+}
 
 /**
  * Returns account info like `handle` and `ratings` from a profile info page
@@ -128,7 +127,7 @@ async function logoutAccount(cfPage: Page, checkStatus?: boolean): Promise<void>
  * Notice:
  * - `profilePage` must be a valid profile page of codeforces
  */
-async function getAccountInfoFromProfilePage(profilePage: Page): Promise<AccountData> {
+async function getAccountInfoFromProfilePage(profilePage: Page): Promise<AccountInfo> {
     // handle and levalName info
     let mainInfoEle = await profilePage.waitForSelector('div.main-info');
     if (mainInfoEle === null) {
@@ -169,11 +168,12 @@ async function getAccountInfoFromProfilePage(profilePage: Page): Promise<Account
             'Got null avatar info from profile page'
         );
     }
-    let accountInfo = new AccountData();
-    accountInfo.handle = handle;
-    accountInfo.ratings = ratings;
-    accountInfo.levelName = levelName;
-    accountInfo.avatarUrl = avatarUrl;
+    let accountInfo: AccountInfo = {
+        handle: handle,
+        ratings: ratings,
+        levelName: levelName,
+        avatarUrl: avatarUrl,
+    };
     return accountInfo;
 }
 

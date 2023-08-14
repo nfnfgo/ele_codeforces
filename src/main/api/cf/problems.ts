@@ -39,7 +39,7 @@ export async function getContestProblems(contestId: number): Promise<ProblemInfo
             let tbodySelector = '#pageContent > .datatable > div > table.problems > tbody';
             let problemsTbody = await problemInfoPage.waitForSelector(tbodySelector);
             // extract info
-            problemInfoList = await problemsTbody.$$eval('tr', function (trList, contestId) {
+            problemInfoList = await problemsTbody!.$$eval('tr', function (trList, contestId) {
                 let resList: ProblemInfo[] = [];
                 let cnt: number = trList.length;
                 for (let i: number = 1; i < cnt; ++i) {
@@ -49,8 +49,8 @@ export async function getContestProblems(contestId: number): Promise<ProblemInfo
                         contestId: contestId,
                         id: tdList[0].innerText,
                         name: (tdList[1].querySelector('div > div > a') as HTMLAnchorElement).innerText,
-                        limit: tdList[1].querySelector('div > div.notice').childNodes[2].nodeValue.trim(),
-                        solvedCount: parseInt(tdList[3].querySelector('a').innerText.trim().substring(1)),
+                        limit: tdList[1].querySelector('div > div.notice')!.childNodes[2].nodeValue!.trim(),
+                        solvedCount: parseInt(tdList[3].querySelector('a')!.innerText.trim().substring(1)),
                     });
                 }
                 return resList;
@@ -112,6 +112,12 @@ export async function getProblemDetailedInfo({ contestId, problemId }: getProble
     try {//div.problem-statement > div.header + div
         await detailedProblemPage.goto(`${cfConfig.baseUrl}/contest/${contestId}/problem/${problemId}`);
         let problemStatementEle = await detailedProblemPage.waitForSelector('div.problem-statement');
+        if (problemStatementEle === null) {
+            throw new errs.EleCFError(
+                'ProblemStatementNotFound',
+                'Could not found problem statement element'
+            )
+        }
         // description
         let description;
         try {
@@ -157,11 +163,33 @@ export async function getProblemDetailedInfo({ contestId, problemId }: getProble
             note: note,
         };
     } catch (e) {
-        throw new Error('Failed to request problem detailed data');
+        throw new errs.EleCFError('RequestDetailedProblemInfoFailed',
+            'Error occurred when requesting detailed problem info\n' +
+            `Detail error message: ${e}`);
     } finally {
         await detailedProblemPage.close();
     }
 
     // return 
     return detailProblemProp;
+}
+
+interface submitProblemConfig {
+    contestId: number;
+    problemId: string;
+    /**
+     * The code answer of this problem
+     */
+    ansCodeString: string;
+    /**
+     * The lang value in `cfConfig` of the language type. Use default language 
+     * if `undefined`
+     * 
+     * Check more info about language `value` in `./config > cfSupportProgramLangList`
+     */
+    langValue: number;
+}
+
+async function submitProblem() {
+    ;
 }
