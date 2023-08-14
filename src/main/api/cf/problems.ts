@@ -174,6 +174,28 @@ export async function getProblemDetailedInfo({ contestId, problemId }: getProble
     return detailProblemProp;
 }
 
+
+
+/**
+ * Submission info interface, contains basic info for a submission
+ */
+export interface SubmissionInfo {
+    /**Codeforces ID of this submission */
+    submissionId: number;
+    /**Submission time of this answer */
+    time: string;
+    /**Full name of this problem */
+    problemFullName: string;
+    /**Name of the language used when submit */
+    langName: string;
+    /**Verdict of this submission, e.g.:`Accepted` */
+    verdict: string;
+    /**Timed consumed, `ms` */
+    timeConsumed: number;
+    /**Memory consumed, `KB` */
+    memoryConsumed: number;
+}
+
 interface submitProblemConfig {
     contestId: number;
     problemId: string;
@@ -190,6 +212,46 @@ interface submitProblemConfig {
     langValue: number;
 }
 
-async function submitProblem() {
-    ;
+/**
+ * Submit answer to a specified problem
+ * 
+ * Returns:
+ * - `[Instance of SubmissionInfo]` if submit succeed AND cf returns an valid verdict. 
+ * This means function will NOT return until judge finished
+ * 
+ * Exceptions:
+ * - `LoggedInAccountRequired` Could not found a logged in account when trying to submit 
+ * answer 
+ */
+async function submitProblem({
+    contestId,
+    problemId,
+    ansCodeString,
+    langValue,
+}: submitProblemConfig): Promise<SubmissionInfo> {
+    let browser = await cfConfig.CFBrowser.getCfBrowser();
+    let submitPage = await browser.newPage();
+    try {
+        // goto problem submit page
+        await submitPage.goto(`${cfConfig.baseUrl}/contest/${contestId}/submit/${problemId}`);
+        // check account login status
+        // select lang
+        // type answer
+        // submit and waitfornav
+        // wait for valid verdict
+        // return
+    } catch (e) {
+        if (e instanceof errs.EleCFError) {
+            throw e;
+        }
+        else {
+            throw new errs.EleCFError(
+                'AnswerSubmissionFailed',
+                'Error occurred when trying to submit an answer to codeforces\n' +
+                `Detail error message: ${e}`
+            )
+        }
+    } finally {
+        await submitPage.close();
+    }
 }

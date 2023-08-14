@@ -2,6 +2,7 @@
 
 ## WorkOn
 
+- WorkOn: Complete problem operation API (e.g.: Submit answer)
 - WorkOn: Complete account API and exposers
 - WorkOn: Settings page
 

@@ -14,6 +14,12 @@ export const contestsUrl = 'contests';
 export class CFBrowser {
     static browser?: Promise<Browser>;
 
+    /**
+     * Return a puppeteer `Browser` instance with singleton mode
+     * 
+     * Notice:
+     * - This method always returns the same `Browser` instance
+     */
     static getCfBrowser(): Promise<Browser> {
         if (this.browser === undefined) {
             // get user data dir path
