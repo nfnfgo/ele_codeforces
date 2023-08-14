@@ -5,6 +5,9 @@ import { app } from 'electron';
 // Tools
 import { createDirIfNotExist } from 'general/tools/file';
 
+// Errors
+import {} from 'general/error/base';
+
 /**Base URL of Codeforces */
 export const baseUrl = 'https://codeforces.com';
 
@@ -46,13 +49,13 @@ export class CFBrowser {
     }
 }
 
-interface SupportLangItem {
+export interface SupportLangItem {
     /**Number represent the value of the item */
     value: number;
     name: string;
 };
 
-let cfSupportProgramLangList: SupportLangItem[] = [
+export let cfSupportProgramLangList: SupportLangItem[] = [
     { "value": 43, "name": "GNU GCC C11 5.1.0" },
     { "value": 80, "name": "Clang++20 Diagnostics" },
     { "value": 52, "name": "Clang++17 Diagnostics" },

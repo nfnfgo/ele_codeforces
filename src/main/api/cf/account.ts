@@ -23,7 +23,7 @@ import * as errs from 'general/error/base';
  * - `cfPage` must have been in a codeforces official page before pass and could not 
  * changed during process
  */
-async function checkLoginStatus(cfPage: Page): Promise<string | undefined> {
+export async function checkLoginStatus(cfPage: Page): Promise<string | undefined> {
     try {
         // get element
         let handleElement = await cfPage.waitForSelector('div.lang-chooser > div:nth-child(2)');

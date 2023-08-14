@@ -2,8 +2,11 @@
 import { title } from 'process';
 import * as cfConfig from './config';
 
+// account
+import { checkLoginStatus } from './account';
+
 // Errors
-import * as errs from 'general/error/base';
+import * as errs from 'general/error/all';
 
 export interface ProblemInfo {
     /**ContestId of the contest which this problems appeared in */
@@ -23,7 +26,7 @@ export interface ProblemInfo {
  */
 export async function getContestProblems(contestId: number): Promise<ProblemInfo[]> {
     if (contestId === undefined) {
-        throw new errs.EleCFError(
+        throw new errs.base.EleCFError(
             'ContestIdRequired',
             'ContestId must be provided when requesting problem data from Codeforces'
         );
@@ -63,7 +66,7 @@ export async function getContestProblems(contestId: number): Promise<ProblemInfo
         return problemInfoList;
     }
     catch (e) {
-        throw new errs.EleCFError(
+        throw new errs.base.EleCFError(
             'RequestError',
             'Error occurred when requesting problem data from Codeforces\n' +
             `Detail error message: ${e}`
@@ -100,7 +103,7 @@ export interface getProblemDetailConfig {
  */
 export async function getProblemDetailedInfo({ contestId, problemId }: getProblemDetailConfig): Promise<ProblemDetailedInfo> {
     if (contestId === undefined || problemId === undefined) {
-        throw new errs.EleCFError(
+        throw new errs.base.EleCFError(
             'ParamsUndefined',
             'ContestId and problemId could not be undefined\n' +
             `Props received: ${JSON.stringify({ contestId: contestId, problemId: problemId })}`
@@ -113,7 +116,7 @@ export async function getProblemDetailedInfo({ contestId, problemId }: getProble
         await detailedProblemPage.goto(`${cfConfig.baseUrl}/contest/${contestId}/problem/${problemId}`);
         let problemStatementEle = await detailedProblemPage.waitForSelector('div.problem-statement');
         if (problemStatementEle === null) {
-            throw new errs.EleCFError(
+            throw new errs.base.EleCFError(
                 'ProblemStatementNotFound',
                 'Could not found problem statement element'
             )
@@ -163,7 +166,7 @@ export async function getProblemDetailedInfo({ contestId, problemId }: getProble
             note: note,
         };
     } catch (e) {
-        throw new errs.EleCFError('RequestDetailedProblemInfoFailed',
+        throw new errs.base.EleCFError('RequestDetailedProblemInfoFailed',
             'Error occurred when requesting detailed problem info\n' +
             `Detail error message: ${e}`);
     } finally {
@@ -235,17 +238,54 @@ async function submitProblem({
         // goto problem submit page
         await submitPage.goto(`${cfConfig.baseUrl}/contest/${contestId}/submit/${problemId}`);
         // check account login status
+        try {
+            let handle = await checkLoginStatus(submitPage);
+            if (handle === undefined) {
+                throw new Error();
+            }
+        } catch (e) {
+            throw new errs.base.EleCFError(
+                'LoggedInAccountRequired',
+                'Logged in account required before submit answer'
+            );
+        }
         // select lang
+        let langItem: cfConfig.SupportLangItem | undefined = undefined;
+        for (let curLangItem of cfConfig.cfSupportProgramLangList) {
+            if (curLangItem.value === langValue) {
+                langItem = curLangItem;
+                break;
+            }
+        }
+        if (langItem === undefined) {
+            throw new errs.base.EleCFError(
+                'LanguageNotFound',
+                `Could not found a support language type with language value ${langValue}`,
+            );
+        }
+        let selectLangEle = await submitPage.waitForSelector('select[name="programTypeId"]');
+        if (selectLangEle === null) {
+            // if insufficient lang value
+            throw new errs.api.EleCFElementNotFound('langSelectEle in answer submit page');
+        }
+        submitPage.evaluate(function (ele, langValue) {
+            ele.value = langValue.toString();
+        }, selectLangEle, langValue);
         // type answer
+        let answerTextEle = await submitPage.waitForSelector('textarea#sourceCodeTextarea');
+        if (answerTextEle === null) {
+            throw new errs.api.EleCFElementNotFound('answerTextInputEle in answer submit page');
+        }
+        await answerTextEle.type(ansCodeString);
         // submit and waitfornav
         // wait for valid verdict
         // return
     } catch (e) {
-        if (e instanceof errs.EleCFError) {
+        if (e instanceof errs.base.EleCFError) {
             throw e;
         }
         else {
-            throw new errs.EleCFError(
+            throw new errs.base.EleCFError(
                 'AnswerSubmissionFailed',
                 'Error occurred when trying to submit an answer to codeforces\n' +
                 `Detail error message: ${e}`
