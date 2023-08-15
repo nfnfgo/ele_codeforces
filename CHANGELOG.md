@@ -2,6 +2,8 @@
 
 ## WorkOn
 
+- WorkOn: Using state management to manage user selected contest and problems
+- WorkOn: Disable puppeteer restore pages notification when app started
 - WorkOn: Complete problem operation API (e.g.: Submit answer)
 - WorkOn: Complete account API and exposers
 - WorkOn: Settings page

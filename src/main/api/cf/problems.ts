@@ -1,3 +1,5 @@
+import { Page } from 'puppeteer';
+
 // Configs
 import { title } from 'process';
 import * as cfConfig from './config';
@@ -7,6 +9,9 @@ import { checkLoginStatus } from './account';
 
 // Errors
 import * as errs from 'general/error/all';
+
+// Tools
+import { asyncSleep } from 'general/tools/async_sleep';
 
 export interface ProblemInfo {
     /**ContestId of the contest which this problems appeared in */
@@ -219,19 +224,24 @@ interface submitProblemConfig {
  * Submit answer to a specified problem
  * 
  * Returns:
- * - `[Instance of SubmissionInfo]` if submit succeed AND cf returns an valid verdict. 
- * This means function will NOT return until judge finished
+ * - `[Instance of SubmissionInfo][]` Return a list of `SubmissionInfo` contains ALL submissions 
+ * in this contest.
+ * 
+ * Notice:
+ * - Function will wait for the newest submission verdict to be valid before return (that means judge finished)
  * 
  * Exceptions:
  * - `LoggedInAccountRequired` Could not found a logged in account when trying to submit 
  * answer 
+ * - `SameCodeSubmitted` This account have submitted exactly the same code before
+ * - `AnswerTestingTimeOut` Cost too long time to wait for newest submission verdict to be valid
  */
 async function submitProblem({
     contestId,
     problemId,
     ansCodeString,
     langValue,
-}: submitProblemConfig): Promise<SubmissionInfo> {
+}: submitProblemConfig): Promise<SubmissionInfo[]> {
     let browser = await cfConfig.CFBrowser.getCfBrowser();
     let submitPage = await browser.newPage();
     try {
@@ -263,7 +273,7 @@ async function submitProblem({
                 `Could not found a support language type with language value ${langValue}`,
             );
         }
-        let selectLangEle = await submitPage.waitForSelector('select[name="programTypeId"]');
+        let selectLangEle = await submitPage.$('select[name="programTypeId"]');
         if (selectLangEle === null) {
             // if insufficient lang value
             throw new errs.api.EleCFElementNotFound('langSelectEle in answer submit page');
@@ -272,13 +282,53 @@ async function submitProblem({
             ele.value = langValue.toString();
         }, selectLangEle, langValue);
         // type answer
-        let answerTextEle = await submitPage.waitForSelector('textarea#sourceCodeTextarea');
+        let answerTextEle = await submitPage.$('textarea#sourceCodeTextarea');
         if (answerTextEle === null) {
             throw new errs.api.EleCFElementNotFound('answerTextInputEle in answer submit page');
         }
         await answerTextEle.type(ansCodeString);
         // submit and waitfornav
+        let submitButtonEle = await submitPage.$('input.submit');
+        if (submitButtonEle === null) {
+            throw new errs.api.EleCFElementNotFound('submitButton in answer submit page');
+        }
+        await Promise.all([
+            submitButtonEle.click(),
+            submitPage.waitForNavigation(),
+        ]);
         // wait for valid verdict
+        if (await submitPage.$('span.error.for__source') !== null) {
+            // if submit failed since of same code policy
+            throw new errs.base.EleCFError(
+                'SameCodeSubmitted',
+                'This account have submitted exactly the same code before',
+            );
+        }
+        let submittedVerdictEle = await submitPage.$('td.status-verdict-cell');
+        async function getWaitingStatus() {
+            return await submitPage.evaluate(function (ele) {
+                let waitingRes = ele?.getAttribute('waiting');
+                if (typeof (waitingRes) !== 'string') {
+                    return true;
+                }
+                else {
+                    return JSON.parse(waitingRes);
+                }
+            }, submittedVerdictEle);
+        }
+        let triedTimes: number = 0;
+        let triedDelayMs: number = 1000;
+        while (await getWaitingStatus() === true) {
+            ++triedTimes;
+            if (triedTimes > 60) {
+                throw new errs.base.EleCFError(
+                    'AnswerTestingTimeOut',
+                    'This answer cost too many time testing',
+                );
+            }
+            await asyncSleep(triedDelayMs);
+        }
+        // finish answer testing, start extracting data
         // return
     } catch (e) {
         if (e instanceof errs.base.EleCFError) {
@@ -294,4 +344,15 @@ async function submitProblem({
     } finally {
         await submitPage.close();
     }
+}
+
+/**
+ * Get submission info from a codeforces submission page
+ * 
+ * Params:
+ * - `submissionPage` Puppeteer `Page` instance, which is currently in a codeforces submission page, and 
+ * this page should NOT redirect until this function finished
+ */
+async function getSubmissionsInfo(submissionPage: Page): Promise<SubmissionInfo[]> {
+    ;
 }
