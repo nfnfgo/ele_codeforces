@@ -19,22 +19,56 @@ import { classNames } from 'renderer/tools/css_tools';
 import { ContestInfo, HistoryContestInfo } from 'main/api/cf/contests';
 import { ProblemDetailedInfo, ProblemInfo, getProblemDetailConfig } from 'main/api/cf/problems';
 
+// Stores
+import { useContestStateStore, useContestStateStoreConfig, ContestStateData } from 'renderer/stores/contestStateStore';
+
 
 export function CFContestsView() {
 
-    let [contestsInfo, setContestsInfo] = useState<ContestInfo[]>([]);
-    let [hisContestInfo, setHisContestInfo] = useState<HistoryContestInfo[]>([]);
-    // Store the contest id which user manually selected
-    let [selectedContestId, setSelectedContestId] = useState<number | undefined>(undefined);
-    // If user prefer to hide the contest list
-    let [hideContestList, setHideContestList] = useState<boolean>(false);
+    /**Current contest state info instance */
+    let contestsInfo: ContestInfo[] = useContestStateStore(
+        (state: useContestStateStoreConfig) => state.info.contestsInfo);
+    let historyContestsInfo: HistoryContestInfo[] = useContestStateStore(
+        (state: useContestStateStoreConfig) => state.info.historyContestsInfo);
+    let hideContestList: boolean = useContestStateStore(
+        (state: useContestStateStoreConfig) => state.info.hideContestListUI);
 
+    /**Update info in contest state store */
+    let updateContestState = useContestStateStore(
+        (state: useContestStateStoreConfig) => state.updateState);
+
+    /**Change `hideContestList` state in contest state store */
+    function triggerHideContestList() {
+        updateContestState(function (state: useContestStateStoreConfig) {
+            state.info.hideContestListUI = !state.info.hideContestListUI;
+        });
+    }
+
+    /**Update contest id in contest state */
+    function updateContestId(newContestId: number) {
+        updateContestState(function (state: useContestStateStoreConfig) {
+            state.info.updateContestId(newContestId);
+        });
+    }
+
+    /**Update contest id in contest state */
+    function updateContestId(newContestId: number) {
+        updateContestState(function (state: useContestStateStoreConfig) {
+            state.info.updateContestId(newContestId);
+        });
+    }
+
+    // Load contest list when this contest info page first loaded
     useEffect(function () {
         window.electron.ipcRenderer.invoke('api:cf:getContestList').then(function (value: ContestInfo[]) {
-            setContestsInfo(value);
+            updateContestState(function (state: useContestStateStoreConfig) {
+                state.info.contestsInfo = value;
+            })
         });
         window.electron.ipcRenderer.invoke('api:cf:getHistoryContestList').then(function (value: HistoryContestInfo[]) {
-            setHisContestInfo(value);
+            updateContestState(function (state: useContestStateStoreConfig) {
+                state.info.historyContestsInfo = value;
+            });
         });
     }, []);
 
@@ -70,7 +104,7 @@ export function CFContestsView() {
                 )}>
                     <button
                         onClick={function () {
-                            setHideContestList(!hideContestList);
+                            triggerHideContestList();
                         }}>
                         <Container
                             className={classNames(
@@ -123,7 +157,7 @@ export function CFContestsView() {
                         <ul className={classNames(
                             'flex flex-col gap-y-2',
                         )}>
-                            {hisContestInfo.map(function (contestInfo) {
+                            {historyContestsInfo.map(function (contestInfo) {
                                 return (
                                     <button key={contestInfo.name}
                                         onClick={function () {

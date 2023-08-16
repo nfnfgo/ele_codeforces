@@ -1,17 +1,33 @@
 import { create } from 'zustand';
+import { immer as immerMiddleware } from 'zustand/middleware/immer';
+import { immerable } from 'immer';
+
+import { ContestInfo, HistoryContestInfo } from 'main/api/cf/contests';
 
 /**
  * Used to store user selection state about contests like contestId, problemId, etc
  */
-class ContestStateData {
+export class ContestStateData {
+    // Support immer middleware
+    [immerable] = true;
+
     constructor() {
         this.contestId = undefined;
         this.problemId = undefined;
+        this.contestsInfo = [];
+        this.historyContestsInfo = [];
+        this.hideContestListUI = false;
     }
     /**Codeforces ID of user selected contest */
     contestId?: number;
     /**Problem ID of user selected problems */
     problemId?: string;
+    /**Incoming contest info list */
+    contestsInfo: ContestInfo[];
+    /**History contest info list (which user can select and check problems) */
+    historyContestsInfo: HistoryContestInfo[];
+    /**If true, the contest list will auto collapsed */
+    hideContestListUI: boolean;
 
     /**
      * Update contestId of this state data
@@ -44,17 +60,50 @@ export interface useContestStateStoreConfig {
     stateVersion: number;
     /**Notify all components which required on `stateVersion` */
     notifyVersionListeners: () => void;
+    /**
+     * Update infos in this state
+     * 
+     * Params:
+     * - `mutateFn` The function to update state. To update state, directly make changes on received 
+     * `stateDraft` params in this function
+     */
+    updateState: <CbReturnType>(mutateFn: (stateDraft: useContestStateStoreConfig) => (CbReturnType)) => (CbReturnType);
+    /**Update contest id in contest state */
+    updateContestId: (newContestId: number) => void;
+    /**Update problem id in contest state */
+    updateProblemId: (newProblemId: string) => void;
+    /**Trigger hide contest list */
+    triggerHideContestList: () => void;
 }
 
-export const useContestStateStore = create(function (set) {
-    let state: useContestStateStoreConfig = {
-        info: new ContestStateData(),
-        stateVersion: 0,
-        notifyVersionListeners() {
-            set((state: useContestStateStoreConfig) => ({
-                stateVersion: state.stateVersion + 1,
-            }));
-        },
-    };
-    return state;
-});
+
+export const useContestStateStore = create(
+    immerMiddleware<useContestStateStoreConfig>(function (set) {
+        let state: useContestStateStoreConfig = {
+            info: new ContestStateData(),
+            stateVersion: 0,
+            notifyVersionListeners() {
+                set((state) => {
+                    state.stateVersion++;
+                })
+            },
+            updateState(mutateFn) {
+                let ret: any;
+                set(function (state: useContestStateStoreConfig) {
+                    ret = mutateFn(state);
+                });
+                return ret;
+            },
+            updateContestId(newContestId) {
+                set(function (state) {
+                    state.info.updateContestId(newContestId);
+                });
+            },
+            updateProblemId(newProblemId) {
+                set(function (state) {
+                    state.info.problemId = newProblemId;
+                });
+            },
+        };
+        return state;
+    }));

@@ -8,6 +8,10 @@
 - WorkOn: Complete account API and exposers
 - WorkOn: Settings page
 
+## 0.1.4
+
+- Update: Use `immer` middleware in contest state management
+
 ## 0.1.3
 
 - Update: Update `cfBrowser` generate logic, avoid async conflict
