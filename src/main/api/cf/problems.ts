@@ -329,7 +329,7 @@ async function submitProblem({
             await asyncSleep(triedDelayMs);
         }
         // finish answer testing, start extracting data
-        // return
+        return await getSubmissionsInfo(submitPage);
     } catch (e) {
         if (e instanceof errs.base.EleCFError) {
             throw e;
@@ -354,5 +354,32 @@ async function submitProblem({
  * this page should NOT redirect until this function finished
  */
 async function getSubmissionsInfo(submissionPage: Page): Promise<SubmissionInfo[]> {
-    ;
+    let tableEle = await submissionPage.$('table.status-frame-datatable > tbody');
+    if (tableEle === null) {
+        throw new errs.api.EleCFElementNotFound('tableEle in submission page');
+    }
+    let submissionRowEleList = await tableEle.$$('table.status-frame-datatable > tbody > tr[data-submission-id]');
+    // iterate all submission row element
+    let submissionInfoList: SubmissionInfo[] = [];
+    for (let submissionRowEle of submissionRowEleList) {
+        // submission id
+        let submissionId = await submissionPage.evaluate(function (ele) {
+            return ele.getAttribute('data-submission-id');
+        }, submissionRowEle);
+        if (submissionId === null) {
+            throw new errs.api.EleCFElementNotFound('submissionId in submission row');
+        }
+        // submission time
+        let submissionTime = await submissionRowEle.$eval('td:nth-child(2)', function (ele) {
+            return ele.innerText;
+        });
+        // problem fullName
+        let problemFullName = await submissionRowEle.$eval('td[data-problemid]', function (ele) {
+            return ele.innerText;
+        });
+        // submission language
+        let langName = await submissionRowEle.$eval('td:nth-child(5)', function (ele) {
+            return ele.innerText;
+        });
+    }
 }
