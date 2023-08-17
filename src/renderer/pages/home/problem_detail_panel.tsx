@@ -9,7 +9,7 @@ import { Center, Container, FlexDiv } from 'renderer/components/container';
 import { CFContestCard, CFHistoryContestCard } from 'renderer/components/cf/contest/contest_card';
 import { HeadTitle, Title } from 'renderer/components/general/title';
 import { CFProblemInfoBlock } from 'renderer/components/cf/contest/problem_info_block';
-import { GoogleIcon } from 'renderer/components/icons/gicon';
+import { GoogleIcon, LoadingSpinningTitle } from 'renderer/components/icons/gicon';
 
 // Tools
 import { classNames } from 'renderer/tools/css_tools';
@@ -19,23 +19,22 @@ import { setDefault } from 'general/tools/set_default';
 import { ContestInfo, HistoryContestInfo } from 'main/api/cf/contests';
 import { ProblemDetailedInfo, ProblemInfo, getProblemDetailConfig } from 'main/api/cf/problems';
 
+// Stores
+import { useContestStateStore } from 'renderer/stores/contestStateStore';
 
-interface ProblemDetailedPanelConfig {
-    contestId: number;
-    problemId: string;
-}
+
 
 /**
- * Components shows the detailed info of the problem based on the contestId and problemId
+ * Components shows the detailed info of the problem based on the contestId and problemId state
  */
-export function ProblemDetailedPanel({
-    contestId,
-    problemId
-}: ProblemDetailedPanelConfig) {
+export function ProblemDetailedPanel() {
     // Loading state of this component
     const [loading, setLoading] = useState<boolean>(true);
     // Store the current problem detailed info for this component
     const [curProblemDetailedInfo, setCurProblemDetailedInfo] = useState<ProblemDetailedInfo | undefined>(undefined);
+
+    let contestId = useContestStateStore(state => state.info.contestId);
+    let problemId = useContestStateStore(state => state.info.problemId);
 
     // Update problem detailed info once the contestid or problemid changed
     useEffect(function () {
@@ -63,6 +62,24 @@ export function ProblemDetailedPanel({
         }
     }, [contestId, problemId]);
 
+
+    if (contestId === undefined) {
+        return <></>;
+    }
+
+
+    if (loading === true && curProblemDetailedInfo === undefined) {
+        return (
+            <LoadingSpinningTitle>Loading...</LoadingSpinningTitle>
+        );
+    }
+
+    if (curProblemDetailedInfo === undefined) {
+        return (<>
+            <Center>Failed to load detailed problem info</Center>
+        </>);
+    }
+
     return (<>
         <FlexDiv
             expand={true}
@@ -71,57 +88,34 @@ export function ProblemDetailedPanel({
                 'py-2',
                 loading ? 'opacity-50' : '',
             )}>
-            {function () {
-                // if loading === false and current detail info is also false
-                // means the data loading process was failed in the useEffect
-                if (curProblemDetailedInfo === undefined && loading === false) {
-                    return <Center>
-                        Failed to load problem detailed info
-                    </Center>
-                }
-                else if (curProblemDetailedInfo === undefined) {
-                    return <Center>
-                        <FlexDiv className={classNames(
-                            'h-[2rem] w-[2rem] flex-none',
-                            'origin-center animate-spin',
-                            'flex-row justify-center items-center',
-                        )}>
-                            <GoogleIcon>progress_activity</GoogleIcon>
-                        </FlexDiv>
-                        Loading...
-                    </Center>
-                }
-                // if has problem detailed data
-                return (
-                    <div id='codeforcesHtmlContent' className={classNames(
-                        'flex flex-col flex-auto h-full w-full min-w-0'
+            <div id='codeforcesHtmlContent' className={classNames(
+                'flex flex-col flex-auto h-full w-full min-w-0'
+            )}>
+                <Container
+                    className='flex-none min-w-0 w-full select-text'
+                    hasColor={true}>
+                    <div className={classNames(
+                        'flex flex-none flex-col min-w-0 w-full',
+                        'px-2 py-2',
+                        '',
                     )}>
-                        <Container
-                            className='flex-none min-w-0 w-full select-text'
-                            hasColor={true}>
-                            <div className={classNames(
-                                'flex flex-none flex-col min-w-0 w-full',
-                                'px-2 py-2',
-                                '',
-                            )}>
-                                <div dangerouslySetInnerHTML={{ __html: curProblemDetailedInfo.description ?? '' }}></div>
-                                <div dangerouslySetInnerHTML={{ __html: curProblemDetailedInfo.inputSpec }}></div>
-                                <div dangerouslySetInnerHTML={{ __html: curProblemDetailedInfo.outputSpec }}></div>
-                                <div dangerouslySetInnerHTML={{ __html: curProblemDetailedInfo.samples ?? '' }}></div>
-                                <div dangerouslySetInnerHTML={{ __html: curProblemDetailedInfo.note ?? '' }}></div>
-                            </div>
-                        </Container>
-                        <FlexDiv className={classNames(
-                            'w-full px-4 py-2',
-                            'sticky bottom-[4rem]',
-                        )}>
-                            <ProblemOperationBar
-                                contestId={contestId}
-                                problemId={problemId}
-                            />
-                        </FlexDiv>
-                    </div>);
-            }()}
+                        <div dangerouslySetInnerHTML={{ __html: curProblemDetailedInfo.description ?? '' }}></div>
+                        <div dangerouslySetInnerHTML={{ __html: curProblemDetailedInfo.inputSpec }}></div>
+                        <div dangerouslySetInnerHTML={{ __html: curProblemDetailedInfo.outputSpec }}></div>
+                        <div dangerouslySetInnerHTML={{ __html: curProblemDetailedInfo.samples ?? '' }}></div>
+                        <div dangerouslySetInnerHTML={{ __html: curProblemDetailedInfo.note ?? '' }}></div>
+                    </div>
+                </Container>
+                <FlexDiv className={classNames(
+                    'w-full px-4 py-2',
+                    'sticky bottom-[4rem]',
+                )}>
+                    <ProblemOperationBar
+                        contestId={contestId}
+                        problemId={problemId!}
+                    />
+                </FlexDiv>
+            </div>
         </FlexDiv>
     </>);
 }
@@ -136,14 +130,20 @@ function ProblemOperationBar({
     contestId,
     problemId,
 }: {
-    problemId: string,
-    contestId: number,
+    problemId?: string,
+    contestId?: number,
 }) {
+    let available = true;
+    if (problemId === undefined || contestId === undefined) {
+        available = false;
+    }
     return (
         <Container
             hasColor={false}
             rounded={false}
             className={classNames(
+                available ? '' : 'opacity-0 pointer-events-none',
+                'transition-all',
                 'w-full h-fit',
                 'rounded-full',
                 'backdrop-blur-lg shadow-lg',
@@ -159,12 +159,12 @@ function ProblemOperationBar({
                 )}>
                 {/* Tutorial */}
                 <ProblemOptBarButton
-                iconName='collections_bookmark'>
+                    iconName='collections_bookmark'>
                     Problem Tutorial
                 </ProblemOptBarButton>
                 {/* Copy Input */}
                 <ProblemOptBarButton
-                iconName='content_cut'>
+                    iconName='content_cut'>
                     Copy Example
                 </ProblemOptBarButton>
                 {/* Submit Button */}

@@ -20,7 +20,7 @@ export function CFContestCard({
         id='contestInfo'
         hasColor={true}
         className={classNames(
-            className,
+            className ?? '',
         )}>
         <FlexDiv className={classNames(
             'flex-col justify-start items-start',
@@ -62,7 +62,7 @@ export function CFHistoryContestCard({
         hasHoverColorTrans={false}
         className={classNames(
             selected ? 'bg-primary text-white' : '',
-            className,
+            className ?? '',
         )}>
         <FlexDiv className={classNames(
             'flex-col justify-start items-start',
@@ -74,7 +74,7 @@ export function CFHistoryContestCard({
                 {contestInfo.name}
             </h2>
             <p className={classNames(
-                selected?'text-white/50':'text-black/50 dark:text-white/50'
+                selected ? 'text-white/50' : 'text-black/50 dark:text-white/50'
             )}>
                 {contestInfo.start}
             </p>
