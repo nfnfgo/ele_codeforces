@@ -1,4 +1,6 @@
 import { Page } from 'puppeteer';
+import { app } from 'electron';
+import path from 'path';
 
 // Configs
 import { title } from 'process';
@@ -12,6 +14,7 @@ import * as errs from 'general/error/all';
 
 // Tools
 import { asyncSleep } from 'general/tools/async_sleep';
+import { createDirIfNotExist } from 'general/tools/file';
 
 export interface ProblemInfo {
     /**ContestId of the contest which this problems appeared in */
@@ -198,13 +201,13 @@ export interface SubmissionInfo {
     langName: string;
     /**Verdict of this submission, e.g.:`Accepted` */
     verdict: string;
-    /**Timed consumed, `ms` */
-    timeConsumed: number;
-    /**Memory consumed, `KB` */
-    memoryConsumed: number;
+    /**Timed consumed, `ms` , could be `undefined`*/
+    timeConsumed?: number;
+    /**Memory consumed, `KB` , could be `undefined`*/
+    memoryConsumed?: number;
 }
 
-interface submitProblemConfig {
+export interface submitProblemConfig {
     contestId: number;
     problemId: string;
     /**
@@ -236,7 +239,7 @@ interface submitProblemConfig {
  * - `SameCodeSubmitted` This account have submitted exactly the same code before
  * - `AnswerTestingTimeOut` Cost too long time to wait for newest submission verdict to be valid
  */
-async function submitProblem({
+export async function submitProblem({
     contestId,
     problemId,
     ansCodeString,
@@ -282,11 +285,12 @@ async function submitProblem({
             ele.value = langValue.toString();
         }, selectLangEle, langValue);
         // type answer
-        let answerTextEle = await submitPage.$('textarea#sourceCodeTextarea');
+        let answerTextEle = await submitPage.$('div.ace_scroller');
         if (answerTextEle === null) {
             throw new errs.api.EleCFElementNotFound('answerTextInputEle in answer submit page');
         }
-        await answerTextEle.type(ansCodeString);
+        await answerTextEle.click();
+        await submitPage.keyboard.type(ansCodeString);
         // submit and waitfornav
         let submitButtonEle = await submitPage.$('input.submit');
         if (submitButtonEle === null) {
@@ -297,14 +301,39 @@ async function submitProblem({
             submitPage.waitForNavigation(),
         ]);
         // wait for valid verdict
-        if (await submitPage.$('span.error.for__source') !== null) {
-            // if submit failed since of same code policy
-            throw new errs.base.EleCFError(
-                'SameCodeSubmitted',
-                'This account have submitted exactly the same code before',
-            );
-        }
+        // if (await submitPage.$('span.error.for__source') !== null) {
+        //     // if submit failed since of same code policy
+        //     throw new errs.base.EleCFError(
+        //         'SameCodeSubmitted',
+        //         'This account have submitted exactly the same code before',
+        //     );
+        // }
+
+        // let screenshotPath = path.join(
+        //     app.getPath('userData'),
+        //     'config',
+        //     'browserData',
+        //     'debug',
+        //     'screenshot',
+        //     'test.png'
+        // );
+        // createDirIfNotExist(path.join(
+        //     app.getPath('userData'),
+        //     'config',
+        //     'browserData',
+        //     'debug',
+        //     'screenshot',
+        // ));
+        // await submitPage.screenshot({
+        //     path: screenshotPath
+        // });
+        // console.log('Screenshot saved');
+        // console.log(screenshotPath);
+
         let submittedVerdictEle = await submitPage.$('td.status-verdict-cell');
+        if (submittedVerdictEle === null) {
+            throw new errs.api.EleCFElementNotFound('verdict status Ele in answer submit page');
+        }
         async function getWaitingStatus() {
             return await submitPage.evaluate(function (ele) {
                 let waitingRes = ele?.getAttribute('waiting');
@@ -363,12 +392,13 @@ async function getSubmissionsInfo(submissionPage: Page): Promise<SubmissionInfo[
     let submissionInfoList: SubmissionInfo[] = [];
     for (let submissionRowEle of submissionRowEleList) {
         // submission id
-        let submissionId = await submissionPage.evaluate(function (ele) {
+        let submissionIdStr = await submissionPage.evaluate(function (ele) {
             return ele.getAttribute('data-submission-id');
         }, submissionRowEle);
-        if (submissionId === null) {
+        if (submissionIdStr === null) {
             throw new errs.api.EleCFElementNotFound('submissionId in submission row');
         }
+        let submissionId: number = parseInt(submissionIdStr, 10);
         // submission time
         let submissionTime = await submissionRowEle.$eval('td:nth-child(2)', function (ele) {
             return ele.innerText;
@@ -381,5 +411,29 @@ async function getSubmissionsInfo(submissionPage: Page): Promise<SubmissionInfo[
         let langName = await submissionRowEle.$eval('td:nth-child(5)', function (ele) {
             return ele.innerText;
         });
+        // verdict
+        let verdict = await submissionRowEle.$eval('td.status-cell', function (ele) {
+            return ele.innerText;
+        });
+        // time consumed
+        let timeConsumed = await submissionRowEle.$eval('td.time-consumed-cell', function (ele) {
+            return parseInt(ele.innerText.split(' ')[0], 10);
+        });
+        // memory consumed
+        let memoryConsumed = await submissionRowEle.$eval('td.memory-consumed-cell', function (ele) {
+            return parseInt(ele.innerText.split(' ')[0], 10);
+        });
+        let newSubmissionInfo: SubmissionInfo = {
+            submissionId: submissionId,
+            time: submissionTime,
+            problemFullName: problemFullName,
+            langName: langName,
+            verdict: verdict,
+            timeConsumed: timeConsumed,
+            memoryConsumed: memoryConsumed,
+        };
+        submissionInfoList.push(newSubmissionInfo);
     }
+    // return final list result
+    return submissionInfoList;
 }

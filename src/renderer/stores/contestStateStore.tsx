@@ -40,12 +40,17 @@ export class ContestStateData {
      * - This function will set `problemId` to `undefined` since 
      * the problemId of the previous contest may be invalid
      */
-    updateContestId(newContestId: number) {
+    updateContestId(newContestId: number): undefined {
         if (newContestId === 0) {
             // clear all contest and problem info
             this.contestId = undefined;
             this.problemId = undefined;
         }
+        else if (newContestId === this.contestId) {
+            return;
+        }
+        this.contestId = newContestId;
+        this.problemId = undefined;
     }
 
     /**Update problem id of this contest state */
@@ -106,8 +111,7 @@ export const useContestStateStore = create(
             },
             updateContestId(newContestId) {
                 set(function (state) {
-                    state.info.contestId = newContestId;
-                    state.info.problemId = undefined;
+                    state.info.updateContestId(newContestId);
                 });
             },
             updateProblemId(newProblemId) {

@@ -17,7 +17,8 @@ import { setDefault } from 'general/tools/set_default';
 
 // Models
 import { ContestInfo, HistoryContestInfo } from 'main/api/cf/contests';
-import { ProblemDetailedInfo, ProblemInfo, getProblemDetailConfig } from 'main/api/cf/problems';
+import { ProblemDetailedInfo, ProblemInfo, getProblemDetailConfig, submitProblemConfig } from 'main/api/cf/problems';
+import { cfSupportProgramLangList } from 'main/api/cf/config';
 
 // Stores
 import { useContestStateStore } from 'renderer/stores/contestStateStore';
@@ -133,10 +134,33 @@ function ProblemOperationBar({
     problemId?: string,
     contestId?: number,
 }) {
+    /**If this operation bar is available now */
     let available = true;
     if (problemId === undefined || contestId === undefined) {
         available = false;
     }
+
+    /**Hanlde callback function when user click `submit from clipboard` button */
+    async function handleClipboardSubmit() {
+        let debugLangValue = 73; // debug submit language type: G++20 winlibs
+        let answerStr = await navigator.clipboard.readText();
+        console.log('Debug: Clipboard code got');
+        console.log(answerStr);
+        let submitProblemProps: submitProblemConfig = {
+            contestId: contestId!,
+            problemId: problemId!,
+            langValue: debugLangValue,
+            ansCodeString: answerStr,
+        };
+        let res = await window.electron.ipcRenderer.invoke(
+            'api:cf:submitProblem',
+            submitProblemProps,
+        );
+        console.log('Submit Result: ');
+        console.log(res);
+    }
+
+
     return (
         <Container
             hasColor={false}
@@ -169,6 +193,7 @@ function ProblemOperationBar({
                 </ProblemOptBarButton>
                 {/* Submit Button */}
                 <ProblemOptBarButton
+                    onClick={handleClipboardSubmit}
                     isPrimary={true}
                     iconName='send'>
                     Clipboard Submit

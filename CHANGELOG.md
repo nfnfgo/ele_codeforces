@@ -11,6 +11,7 @@
 
 - Update: Use `immer` middleware in contest state management
 - Update: Using state management to manage user selected contest and problems
+- Fix: Fix the issue that double click contest will cause problem id set to `undefined`
 
 ## 0.1.3
 

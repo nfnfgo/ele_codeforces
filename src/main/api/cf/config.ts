@@ -12,7 +12,7 @@ import {} from 'general/error/base';
 export const baseUrl = 'https://codeforces.com';
 
 /**Contests list URL */
-export const contestsUrl = 'contests';
+export const contestsUrl = 'contests?complete=true';
 
 export class CFBrowser {
     static browser?: Promise<Browser>;
