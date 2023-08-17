@@ -32,31 +32,26 @@ export function CFContestsView() {
         (state: useContestStateStoreConfig) => state.info.historyContestsInfo);
     let hideContestList: boolean = useContestStateStore(
         (state: useContestStateStoreConfig) => state.info.hideContestListUI);
+    let contestId = useContestStateStore(
+        (state: useContestStateStoreConfig) => state.info.contestId);
+    let problemId = useContestStateStore(
+        (state: useContestStateStoreConfig) => state.info.problemId);
 
     /**Update info in contest state store */
     let updateContestState = useContestStateStore(
         (state: useContestStateStoreConfig) => state.updateState);
 
     /**Change `hideContestList` state in contest state store */
-    function triggerHideContestList() {
-        updateContestState(function (state: useContestStateStoreConfig) {
-            state.info.hideContestListUI = !state.info.hideContestListUI;
-        });
-    }
+    let triggerHideContestList = useContestStateStore(
+        (state: useContestStateStoreConfig) => state.triggerHideContestList);
 
     /**Update contest id in contest state */
-    function updateContestId(newContestId: number) {
-        updateContestState(function (state: useContestStateStoreConfig) {
-            state.info.updateContestId(newContestId);
-        });
-    }
+    let updateContestId = useContestStateStore(
+        (state: useContestStateStoreConfig) => state.updateContestId);
 
-    /**Update contest id in contest state */
-    function updateContestId(newContestId: number) {
-        updateContestState(function (state: useContestStateStoreConfig) {
-            state.info.updateContestId(newContestId);
-        });
-    }
+    /**Update problem id in contest state */
+    let updateProblemId = useContestStateStore(
+        (state: useContestStateStoreConfig) => state.updateProblemId);
 
     // Load contest list when this contest info page first loaded
     useEffect(function () {
@@ -161,12 +156,12 @@ export function CFContestsView() {
                                 return (
                                     <button key={contestInfo.name}
                                         onClick={function () {
-                                            setSelectedContestId(contestInfo.contestId);
+                                            updateContestId(contestInfo.contestId);
                                         }}>
                                         <li key={contestInfo.name}>
                                             <CFHistoryContestCard
                                                 contestInfo={contestInfo}
-                                                selected={contestInfo.contestId === selectedContestId} />
+                                                selected={contestInfo.contestId === contestId} />
                                         </li>
                                     </button>
                                 );
@@ -181,14 +176,7 @@ export function CFContestsView() {
                 className={classNames(
                     'flex-auto h-full w-[50rem]',
                 )}>
-                {function () {
-                    if (selectedContestId === undefined) {
-                        return <Center>No Contest Selected</Center>
-                    }
-                    return (<CFContestDetailPanel
-                        contestId={selectedContestId}
-                    />);
-                }()}
+                <CFContestDetailPanel />
             </FlexDiv>
         </FlexDiv >);
 }
@@ -198,24 +186,28 @@ export function CFContestsView() {
 /**
  * Panel UI of the contest detail info
  */
-function CFContestDetailPanel({ contestId }: { contestId: number }) {
+function CFContestDetailPanel() {
     const [problemsInfo, setProblemsInfo] = useState<ProblemInfo[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
-    /**Store the problem id that user selected */
-    const [selectedProblemId, setSelectedProblemId] = useState<string | undefined>(undefined);
-    const [selectedContestId, setSelectedContestId] = useState<number>(contestId);
+
+    let contestId = useContestStateStore(state => state.info.contestId);
+    let problemId = useContestStateStore(state => state.info.problemId);
+
+    let updateProblemId = useContestStateStore(state => state.updateProblemId);
 
     // Load info for this component
     useEffect(function () {
+        if (contestId === undefined) {
+            return;
+        }
         setLoading(true);
         try {
             window.electron.ipcRenderer.invoke('api:cf:getContestProblem', contestId).then(
                 function (info) {
                     setLoading(false);
                     setProblemsInfo(info);
-                    // Set default selected problem to the first problem
-                    setSelectedContestId(contestId);
-                    setSelectedProblemId((info as ProblemInfo[])[0].id);
+                    // Because this is a new contest, so default to select the first problem
+                    updateProblemId((info as ProblemInfo[])[0].id);
                 }
             );
         }
@@ -223,6 +215,10 @@ function CFContestDetailPanel({ contestId }: { contestId: number }) {
             setLoading(false);
         }
     }, [contestId]);
+
+    if (contestId === undefined) {
+        return <Center>No Contest Selected</Center>;
+    }
 
     return (
         <FlexDiv className={classNames(
@@ -259,21 +255,18 @@ function CFContestDetailPanel({ contestId }: { contestId: number }) {
                                 )}
                                 key={`${problemInfo.contestId}_${problemInfo.id}`}
                                 onClick={function () {
-                                    setSelectedProblemId(problemInfo.id);
+                                    updateProblemId(problemInfo.id);
                                 }}>
                                 <CFProblemInfoBlock
                                     info={problemInfo}
-                                    selected={problemInfo.id === selectedProblemId}
+                                    selected={problemInfo.id === problemId}
                                 />
                             </button>
                         );
                     })}
                 </FlexDiv>
                 {/* Problem Detailed Info Part */}
-                <ProblemDetailedPanel
-                    contestId={selectedContestId}
-                    problemId={selectedProblemId ?? ''}
-                />
+                <ProblemDetailedPanel />
             </FlexDiv>
         </FlexDiv>
     );

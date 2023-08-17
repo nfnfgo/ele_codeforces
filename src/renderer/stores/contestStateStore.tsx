@@ -47,6 +47,15 @@ export class ContestStateData {
             this.problemId = undefined;
         }
     }
+
+    /**Update problem id of this contest state */
+    updateProblemId(newProblemId: string) {
+        this.problemId = newProblemId;
+    }
+
+    async fromStorageTest() {
+        console.log('Contest state from storage test called');
+    }
 }
 
 export interface useContestStateStoreConfig {
@@ -79,6 +88,7 @@ export interface useContestStateStoreConfig {
 
 export const useContestStateStore = create(
     immerMiddleware<useContestStateStoreConfig>(function (set) {
+        console.log('New contest state store instance created');
         let state: useContestStateStoreConfig = {
             info: new ContestStateData(),
             stateVersion: 0,
@@ -96,14 +106,24 @@ export const useContestStateStore = create(
             },
             updateContestId(newContestId) {
                 set(function (state) {
-                    state.info.updateContestId(newContestId);
+                    state.info.contestId = newContestId;
+                    state.info.problemId = undefined;
                 });
             },
             updateProblemId(newProblemId) {
                 set(function (state) {
-                    state.info.problemId = newProblemId;
+                    state.info.updateProblemId(newProblemId);
+                });
+            },
+            triggerHideContestList() {
+                set(function (state) {
+                    state.info.hideContestListUI = !state.info.hideContestListUI;
                 });
             },
         };
+        // add ipcRenderer refresh listener
+        window.electron.ipcRenderer.on('windowmgr:signal:refresh', function () {
+            state.info.fromStorageTest();
+        });
         return state;
     }));
