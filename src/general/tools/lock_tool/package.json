@@ -1,7 +1,7 @@
 {
-  "name": "async_tool",
+  "name": "lock_tool",
   "version": "0.0.1",
-  "description": "A javascript package helps with async operations like async lock etc.",
+  "description": "A javascript package helps with some function lock feature",
   "main": "index.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

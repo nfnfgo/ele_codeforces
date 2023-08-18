@@ -9,7 +9,7 @@ import { Center, Container, FlexDiv } from 'renderer/components/container';
 import { CFContestCard, CFHistoryContestCard } from 'renderer/components/cf/contest/contest_card';
 import { HeadTitle, Title } from 'renderer/components/general/title';
 import { CFProblemInfoBlock } from 'renderer/components/cf/contest/problem_info_block';
-import { ProblemDetailedPanel } from './problem_detail_panel';
+import { ProblemDetailedPanel, ProblemOperationBar } from './problem_detail_panel';
 import { GoogleIcon } from 'renderer/components/icons/gicon';
 
 // Tools
@@ -234,7 +234,7 @@ function CFContestDetailPanel() {
                     loading ? 'opacity-50' : '',
                 )}
                 expand={true}>
-                {/* Select Problem */}
+                {/* Select Problem Part*/}
                 <FlexDiv
                     className={classNames(
                         'flex-none',
@@ -267,6 +267,13 @@ function CFContestDetailPanel() {
                 </FlexDiv>
                 {/* Problem Detailed Info Part */}
                 <ProblemDetailedPanel />
+
+            </FlexDiv>
+            {/* Problem Operation Bar Part */}
+            <FlexDiv className={classNames(
+                'absolute bottom-2 right-2',
+            )}>
+                <ProblemOperationBar></ProblemOperationBar>
             </FlexDiv>
         </FlexDiv>
     );

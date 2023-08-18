@@ -172,7 +172,7 @@ export function Center({ children, className }: { children: React.ReactNode, cla
         <FlexDiv className={classNames(
             'h-full w-full',
             'flex-row justify-center items-center',
-            className,
+            className ?? '',
         )}>
             {children}
         </FlexDiv>);
