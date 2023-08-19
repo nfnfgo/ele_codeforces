@@ -4,6 +4,26 @@ export interface SupportLangItem {
     name: string;
 };
 
+/**
+ * Submission info interface, contains basic info for a submission
+ */
+export interface SubmissionInfo {
+    /**Codeforces ID of this submission */
+    submissionId: number;
+    /**Submission time of this answer */
+    time: string;
+    /**Full name of this problem */
+    problemFullName: string;
+    /**Name of the language used when submit */
+    langName: string;
+    /**Verdict of this submission, e.g.:`Accepted` */
+    verdict: string;
+    /**Timed consumed, `ms` , could be `undefined`*/
+    timeConsumed?: number;
+    /**Memory consumed, `KB` , could be `undefined`*/
+    memoryConsumed?: number;
+}
+
 export let cfSupportProgramLangList: SupportLangItem[] = [
     { "value": 43, "name": "GNU GCC C11 5.1.0" },
     { "value": 80, "name": "Clang++20 Diagnostics" },

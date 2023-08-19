@@ -20,7 +20,7 @@ import { setDefault } from 'general/tools/set_default';
 // Models
 import { ContestInfo, HistoryContestInfo } from 'main/api/cf/contests';
 import { ProblemDetailedInfo, ProblemInfo, getProblemDetailConfig, submitProblemConfig } from 'main/api/cf/problems';
-import { cfSupportProgramLangList, SupportLangItem } from 'general/config/codeforces';
+import { cfSupportProgramLangList, SupportLangItem } from 'general/models/codeforces';
 
 // Stores
 import { useContestStateStore } from 'renderer/stores/contestStateStore';
@@ -205,31 +205,41 @@ export function ProblemOperationBar() {
                     'overflow-visible',
                 )
                 }>
-                {/* Buttons Part */}
+                {/* Operation Bar Root Div Part */}
                 <FlexDiv
                     expand={true}
                     className={classNames(
-                        'flex-row justify-end gap-x-2',
+                        'flex-row justify-between gap-x-2',
                         'py-2 px-2'
                     )}>
-                    {/* Tutorial */}
-                    <ProblemOptBarButton
-                        iconName='collections_bookmark'>
-                        Problem Tutorial
-                    </ProblemOptBarButton>
-                    {/* Copy Input */}
-                    <ProblemOptBarButton
-                        iconName='content_cut'>
-                        Copy Example
-                    </ProblemOptBarButton>
-                    {/* Submit Button */}
-                    <ProblemOptBarButton
-                        onClick={handleClipboardSubmit}
-                        isPrimary={true}
-                        iconName='send'
-                        onHoverChanged={handleSubmitButtonHoverStatus}>
-                        Clipboard Submit
-                    </ProblemOptBarButton>
+                    {/* Submission Status Bar */}
+                    <FlexDiv className={classNames(
+                        'rounded-full'
+                    )}>
+                    </FlexDiv>
+                    {/* Buttons Part */}
+                    <FlexDiv className={classNames(
+                        'flex-row gap-x-2',
+                    )}>
+                        {/* Tutorial */}
+                        <ProblemOptBarButton
+                            iconName='collections_bookmark'>
+                            Problem Tutorial
+                        </ProblemOptBarButton>
+                        {/* Copy Input */}
+                        <ProblemOptBarButton
+                            iconName='content_cut'>
+                            Copy Example
+                        </ProblemOptBarButton>
+                        {/* Submit Button */}
+                        <ProblemOptBarButton
+                            onClick={handleClipboardSubmit}
+                            isPrimary={true}
+                            iconName='send'
+                            onHoverChanged={handleSubmitButtonHoverStatus}>
+                            Clipboard Submit
+                        </ProblemOptBarButton>
+                    </FlexDiv>
                 </FlexDiv>
             </Container>
         </FlexDiv>
@@ -255,6 +265,9 @@ interface ProblemOptBarButtonConfig {
     className?: string;
 }
 
+/**
+ * Button component used in the problem opt bar
+ */
 function ProblemOptBarButton({
     onClick,
     isPrimary,
@@ -311,7 +324,9 @@ function ProblemOptBarButton({
     </>);
 }
 
-
+/**
+ * Hover block component showed when hover on `clipboard submit` button
+ */
 function ClipboardSubmitHoverBlock({
     handleHoverStatus,
 }: {
@@ -402,7 +417,7 @@ function ClipboardSubmitHoverBlock({
                                     vertical='top'
                                     horizonal='left'
                                     buttonColorClassName='bg-black/5 dark:bg-white/5'
-                                    dropdownColorClassName='bg-fgcolor dark:bg-fgcolor-dark'/>
+                                    dropdownColorClassName='bg-fgcolor dark:bg-fgcolor-dark' />
                             </FlexDiv>
                         </Container>
                     </button>

@@ -16,6 +16,9 @@ import * as errs from 'general/error/all';
 import { asyncSleep } from 'general/tools/async_sleep';
 import { createDirIfNotExist } from 'general/tools/file';
 
+// Models
+import { SubmissionInfo, SupportLangItem, cfSupportProgramLangList } from 'general/models/codeforces';
+
 export interface ProblemInfo {
     /**ContestId of the contest which this problems appeared in */
     contestId: number;
@@ -185,28 +188,6 @@ export async function getProblemDetailedInfo({ contestId, problemId }: getProble
     return detailProblemProp;
 }
 
-
-
-/**
- * Submission info interface, contains basic info for a submission
- */
-export interface SubmissionInfo {
-    /**Codeforces ID of this submission */
-    submissionId: number;
-    /**Submission time of this answer */
-    time: string;
-    /**Full name of this problem */
-    problemFullName: string;
-    /**Name of the language used when submit */
-    langName: string;
-    /**Verdict of this submission, e.g.:`Accepted` */
-    verdict: string;
-    /**Timed consumed, `ms` , could be `undefined`*/
-    timeConsumed?: number;
-    /**Memory consumed, `KB` , could be `undefined`*/
-    memoryConsumed?: number;
-}
-
 export interface submitProblemConfig {
     contestId: number;
     problemId: string;
@@ -263,8 +244,8 @@ export async function submitProblem({
             );
         }
         // select lang
-        let langItem: cfConfig.SupportLangItem | undefined = undefined;
-        for (let curLangItem of cfConfig.cfSupportProgramLangList) {
+        let langItem: SupportLangItem | undefined = undefined;
+        for (let curLangItem of cfSupportProgramLangList) {
             if (curLangItem.value === langValue) {
                 langItem = curLangItem;
                 break;
@@ -382,7 +363,7 @@ export async function submitProblem({
  * - `submissionPage` Puppeteer `Page` instance, which is currently in a codeforces submission page, and 
  * this page should NOT redirect until this function finished
  */
-async function getSubmissionsInfo(submissionPage: Page): Promise<SubmissionInfo[]> {
+export async function getSubmissionsInfo(submissionPage: Page): Promise<SubmissionInfo[]> {
     let tableEle = await submissionPage.$('table.status-frame-datatable > tbody');
     if (tableEle === null) {
         throw new errs.api.EleCFElementNotFound('tableEle in submission page');

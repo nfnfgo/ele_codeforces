@@ -3,9 +3,10 @@
 ## WorkOn
 
 - WorkOn: Disable puppeteer restore pages notification when app started
+- WorkOn: Showing submission status digest in contest list
+- WorkOn: Showing submission detailed info in contest detail page
 - WorkOn: Complete problem operation API (e.g.: Submit answer)
 - WorkOn: Complete account API and exposers
-- WorkOn: Settings page
 
 ## 0.1.4
 

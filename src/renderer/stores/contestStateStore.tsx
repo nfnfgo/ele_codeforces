@@ -2,7 +2,9 @@ import { create } from 'zustand';
 import { immer as immerMiddleware } from 'zustand/middleware/immer';
 import { immerable } from 'immer';
 
+// Models
 import { ContestInfo, HistoryContestInfo } from 'main/api/cf/contests';
+import { SubmissionInfo } from 'general/models/codeforces';
 
 /**
  * Used to store user selection state about contests like contestId, problemId, etc
@@ -28,6 +30,13 @@ export class ContestStateData {
     historyContestsInfo: HistoryContestInfo[];
     /**If true, the contest list will auto collapsed */
     hideContestListUI: boolean;
+    /**
+     * Submission info list which stores all recent submission of this contest
+     * 
+     * Notice:
+     * - This list could be empty if no account logged in
+     */
+    contestSubmissionInfo: SubmissionInfo[];
 
     /**
      * Update contestId of this state data
@@ -41,16 +50,19 @@ export class ContestStateData {
      * the problemId of the previous contest may be invalid
      */
     updateContestId(newContestId: number): undefined {
+        if (newContestId === this.contestId) {
+            return;
+        }
         if (newContestId === 0) {
             // clear all contest and problem info
             this.contestId = undefined;
-            this.problemId = undefined;
         }
-        else if (newContestId === this.contestId) {
-            return;
+        else {
+            this.contestId = newContestId;
         }
-        this.contestId = newContestId;
+        // clear all outdated data
         this.problemId = undefined;
+        this.contestSubmissionInfo = [];
     }
 
     /**Update problem id of this contest state */

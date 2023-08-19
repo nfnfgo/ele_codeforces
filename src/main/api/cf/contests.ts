@@ -4,6 +4,11 @@ import * as cfConfig from './config';
 // Errors
 import * as errs from 'general/error/base';
 
+// Models
+import { SubmissionInfo } from 'general/models/codeforces';
+
+import { getSubmissionsInfo } from './problems';
+
 export interface ContestInfo {
     name: string;
     writer: string;
