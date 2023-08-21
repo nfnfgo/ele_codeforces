@@ -18,9 +18,9 @@ import { classNames } from 'renderer/tools/css_tools';
 import { setDefault } from 'general/tools/set_default';
 
 // Models
-import { ContestInfo, HistoryContestInfo } from 'main/api/cf/contests';
-import { ProblemDetailedInfo, ProblemInfo, getProblemDetailConfig, submitProblemConfig } from 'main/api/cf/problems';
-import { cfSupportProgramLangList, SupportLangItem } from 'general/models/codeforces';
+import { ContestInfo, HistoryContestInfo, getContestSubmissionInfoConfig } from 'general/models/cf/contests';
+import { ProblemDetailedInfo, ProblemInfo, getProblemDetailConfig, submitProblemConfig } from 'general/models/cf/problems';
+import { cfSupportProgramLangList, SupportLangItem, SubmissionInfo } from 'general/models/codeforces';
 
 // Stores
 import { useContestStateStore } from 'renderer/stores/contestStateStore';
@@ -38,6 +38,7 @@ export function ProblemDetailedPanel() {
 
     let contestId = useContestStateStore(state => state.info.contestId);
     let problemId = useContestStateStore(state => state.info.problemId);
+    let updateContestState = useContestStateStore(state => state.updateState);
 
     // Update problem detailed info once the contestid or problemid changed
     useEffect(function () {
@@ -64,6 +65,35 @@ export function ProblemDetailedPanel() {
             setLoading(false);
         }
     }, [contestId, problemId]);
+
+    // Update contest submission info everytime contest id changed
+    useEffect(function () {
+        loadingSubmissionInfo();
+    }, [contestId]);
+
+    async function loadingSubmissionInfo() {
+        try {
+            // Do not fetch data when contestId is undefined
+            if (contestId === undefined) {
+                return;
+            }
+            // Fetch data
+            let props: getContestSubmissionInfoConfig = {
+                contestId: contestId,
+                checkLogin: true,
+            };
+            let submissionInfo: SubmissionInfo[] = await window.electron.ipcRenderer.invoke(
+                'api:cf:getContestSubmissionInfo',
+                props,
+            );
+            // Update the contest state store
+            updateContestState(function (state) {
+                state.info.contestSubmissionInfo = submissionInfo;
+            });
+        } catch (e) {
+            ;
+        }
+    }
 
 
     if (contestId === undefined) {
@@ -403,7 +433,7 @@ function ClipboardSubmitHoverBlock({
                                 'overflow-visible',
                             )}>
                             <FlexDiv className={classNames(
-                                'mx-2 my-1 w-full',
+                                'w-full',
                                 'overflow-visible',
                             )}>
                                 {/* Language Selection Part */}

@@ -1,5 +1,10 @@
 import { create } from 'zustand';
 
+// Middleware
+import { immer as immerMiddleware } from 'zustand/middleware/immer';
+
+import { immerable, produce } from 'immer';
+
 // Error
 import * as eleCfErr from 'general/error/base';
 
@@ -7,6 +12,9 @@ import * as eleCfErr from 'general/error/base';
  * Data class for codeforces account info
  */
 export class AccountData {
+    // Support immer middleware
+    [immerable] = true;
+
     constructor(account?: string | null, password?: string | null) {
         if (account === undefined) {
             account = null;
@@ -41,22 +49,23 @@ export class AccountData {
     /**URL address of user pic info, e.g.:`https://userpic.codeforces.org/xxx/title/xxx.jpg` */
     avatarUrl: string | null;
 
-    updateWith(anoIns: AccountData): AccountData {
-        this.account = anoIns.account;
-        this.password = anoIns.password;
-        this.handle = anoIns.handle;
-        this.ratings = anoIns.ratings;
-        this.levelName = anoIns.levelName;
-        this.avatarUrl = anoIns.avatarUrl;
-        return this;
-    }
+    // updateWith(anoIns: AccountData): AccountData {
+    //     this.account = anoIns.account;
+    //     this.password = anoIns.password;
+    //     this.handle = anoIns.handle;
+    //     this.ratings = anoIns.ratings;
+    //     this.levelName = anoIns.levelName;
+    //     this.avatarUrl = anoIns.avatarUrl;
+    //     return this;
+    // }
 
-    static copyWith(anoIns: AccountData): AccountData {
-        return new AccountData(anoIns.account, anoIns.password).updateWith(anoIns);
-    }
+    // static copyWith(anoIns: AccountData): AccountData {
+    //     return new AccountData(anoIns.account, anoIns.password).updateWith(anoIns);
+    // }
 
     async toStorage(): Promise<AccountData> {
-        try {// Update info
+        try {
+            // Update info
             await window.electron.ipcRenderer.invoke(
                 'storage:eleCfConfig:setInfo',
                 'accountInfo',
@@ -68,33 +77,26 @@ export class AccountData {
             throw new eleCfErr.EleCFError(
                 'WriteStorageError',
                 'Error occurred when tring to write account info into storage\n' +
-                `Detail error message: ${e}` + 6
-
-            );
-        }
-    }
-
-    async fromStorage(): Promise<AccountData> {
-        try {
-            let jsonInfo = await window.electron.ipcRenderer.invoke('storage:eleCfConfig:getInfo', 'accountInfo');
-            this.account = jsonInfo.account;
-            this.password = jsonInfo.password;
-            this.handle = jsonInfo.handle;
-            this.ratings = jsonInfo.ratings;
-            this.levelName = jsonInfo.levelName;
-            this.avatarUrl = jsonInfo.avatarUrl;
-            return this;
-        } catch (e) {
-            throw new eleCfErr.EleCFError(
-                'ReadStorageError',
-                'Error occurred when reading account info from the storage\n' +
                 `Detail error message: ${e}`
+
             );
         }
     }
 
+    /**
+     * Update account info from another property with the same field
+     */
     fromProps(props: any) {
-        ;
+        try {
+            this.account = props.account ?? null;
+            this.password = props.password ?? null;
+            this.handle = props.handle ?? null;
+            this.ratings = props.ratings ?? null;
+            this.levelName = props.levelName ?? null;
+            this.avatarUrl = props.avatarUrl ?? null;
+        } catch (e) {
+            ;
+        }
     }
 }
 
@@ -102,13 +104,13 @@ export interface useAccountStoreConfig {
     /**`AccountData` instance which stores user's account data */
     accountData: AccountData;
     /**
-     * Replace the `accountData` to a totally new data
+     * Upate the current account data store info
      * 
-     * Notice:
-     * - Will NOT notify listeners if the new data is the same instance to the 
-     * old one (even if the props has been changed)
+     * Params:
+     * - `mutateFn` Function that received a current state draft, and directly 
+     * make changes on this draft, which will be later be sync to the real state
      */
-    updateAccountData: (newAccountData: AccountData) => void;
+    updateAccountData: (mutateFn: (draft: useAccountStoreConfig) => (any)) => void;
     /**
      * Automatically read the data from storage package and update current state
      */
@@ -119,30 +121,34 @@ export interface useAccountStoreConfig {
 /**
  * Store provide some codeforces account info and data
  */
-export const useAccountStore = create(function (set) {
-    let storeInfo: useAccountStoreConfig = {
-        accountData: new AccountData(),
-        updateAccountData(newAccountData) {
-            set(function () {
-                newAccountData.toStorage();
-                return {
-                    accountData: newAccountData,
-                };
-            });
-        },
-        async updateAccountDataFromStorage() {
-            let newAccData = await (new AccountData()).fromStorage();
-            set(() => ({ accountData: newAccData }));
+export const useAccountStore = create(immerMiddleware<useAccountStoreConfig>(
+    function (set, get) {
+        let storeInfo: useAccountStoreConfig = {
+            accountData: new AccountData(),
+            updateAccountData(mutateFn) {
+                set(function (state) {
+                    mutateFn(state);
+                });
+            },
+            async updateAccountDataFromStorage() {
+                try {
+                    let jsonInfo = await window.electron.ipcRenderer.invoke('storage:eleCfConfig:getInfo', 'accountInfo');
+                    set(function (state) {
+                        state.accountData.fromProps(jsonInfo);
+                    });
+                } catch (e) {
+                    throw new eleCfErr.EleCFError(
+                        'ReadStorageError',
+                        'Error occurred when reading account info from the storage\n' +
+                        `Detail error message: ${e}`
+                    );
+                }
+            }
         }
-    }
-    // add ipcRenderer refresh listener
-    try {
+        // add ipcRenderer refresh listener
         window.electron.ipcRenderer.on('windowmgr:signal:refresh', function () {
             storeInfo.updateAccountDataFromStorage();
         });
-    } catch (e) {
-        ;
-    }
-    return storeInfo;
-}
+        return storeInfo;
+    })
 );

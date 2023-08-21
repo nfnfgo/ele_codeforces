@@ -4,6 +4,7 @@ import React, { CSSProperties } from "react";
 
 // Tools
 import { classNames } from "renderer/tools/css_tools";
+import { setDefault } from 'general/tools/set_default';
 
 
 interface ContainerConfig {
@@ -126,6 +127,7 @@ interface FlexDivConfig {
      */
     clearMinLimit?: boolean,
     style?: CSSProperties,
+    onHoverStateChange?: (isHovered: boolean) => any;
 }
 
 export function FlexDiv({
@@ -135,6 +137,7 @@ export function FlexDiv({
     expand,
     clearMinLimit,
     style,
+    onHoverStateChange,
 }: FlexDivConfig) {
     if (className === undefined) {
         className = '';
@@ -147,10 +150,13 @@ export function FlexDiv({
     if (clearMinLimit === undefined) {
         clearMinLimit = true;
     }
+    onHoverStateChange = setDefault(onHoverStateChange, function () { });
 
     return (
         <>
             <div
+                onMouseEnter={function(){onHoverStateChange!(true)}}
+                onMouseLeave={function(){onHoverStateChange!(false)}}
                 className={classNames(
                     'flex',
                     clearMinLimit ? 'min-h-0 min-w-0' : '',

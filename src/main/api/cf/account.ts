@@ -10,7 +10,7 @@ import * as cfConfig from './config';
 import * as errs from 'general/error/base';
 
 // Models
-// import { AccountData } from 'renderer/stores/accountStore';
+import { logInCfAccountConfig } from 'general/models/cf/account';
 
 /**
  * Check if there is an account logged into codeforces website in puppeteer
@@ -175,19 +175,6 @@ async function getAccountInfoFromProfilePage(profilePage: Page): Promise<Account
         avatarUrl: avatarUrl,
     };
     return accountInfo;
-}
-
-export interface logInCfAccountConfig {
-    account: string;
-    password: string;
-    /**
-     * If `true`, send refresh signal to all app page after a successful login, including `mainWindow`
-     */
-    triggerRefresh?: boolean;
-    /**
-     * If `true`, update `accountInfo` storage after a successful login
-     */
-    updateStorage?: boolean;
 }
 
 /**

@@ -1,5 +1,6 @@
 import { EleCFError } from "./base";
 
+// Tools
 import { setDefault } from 'general/tools/set_default';
 
 /**
@@ -18,6 +19,27 @@ export class EleCFElementNotFound extends EleCFError {
         super(
             'ElementNotFound',
             `Could not found ${elementName}`,
+            info,
+        );
+    }
+}
+
+/**
+ * Throw this error when a feature is require a logged in account and 
+ * app currently has no available account logged in
+ */
+export class LoggedInAccountRequired extends EleCFError {
+    constructor(detailedInfo?: string, info?: any) {
+        let addonInfo: string = '';
+        if (detailedInfo === undefined) {
+            ;
+        } else {
+            addonInfo += '\n';
+            addonInfo += detailedInfo;
+        }
+        super(
+            'LoggedInAccountRequired',
+            'A logged in account required' + addonInfo,
             info,
         );
     }

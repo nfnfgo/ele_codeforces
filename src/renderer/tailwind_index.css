@@ -758,12 +758,24 @@ video {
   height: 100vh;
 }
 
+.max-h-0 {
+  max-height: 0px;
+}
+
 .max-h-60 {
   max-height: 15rem;
 }
 
 .max-h-\[10rem\] {
   max-height: 10rem;
+}
+
+.max-h-fit {
+  max-height: fit-content;
+}
+
+.max-h-\[3rem\] {
+  max-height: 3rem;
 }
 
 .min-h-0 {
@@ -818,8 +830,20 @@ video {
   min-width: fit-content;
 }
 
+.max-w-0 {
+  max-width: 0rem;
+}
+
 .max-w-\[20rem\] {
   max-width: 20rem;
+}
+
+.max-w-fit {
+  max-width: fit-content;
+}
+
+.max-w-\[15rem\] {
+  max-width: 15rem;
 }
 
 .flex-auto {
@@ -1292,8 +1316,8 @@ video {
   transition-duration: 200ms;
 }
 
-.duration-300 {
-  transition-duration: 300ms;
+.duration-\[0\.2s\] {
+  transition-duration: 0.2s;
 }
 
 .duration-\[1\.2s\] {
@@ -1304,8 +1328,8 @@ video {
   transition-timing-function: cubic-bezier(0.4, 0, 1, 1);
 }
 
-.ease-in-out {
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+.ease-linear {
+  transition-timing-function: linear;
 }
 
 .ease-out {
@@ -1380,16 +1404,16 @@ video {
   outline-offset: 2px;
 }
 
-.group\/little-level-block:hover .group-hover\/little-level-block\:h-\[2rem\] {
-  height: 2rem;
-}
-
 .group\/no-account-login:hover .group-hover\/no-account-login\:h-\[3rem\] {
   height: 3rem;
 }
 
-.group\/little-level-block:hover .group-hover\/little-level-block\:w-\[7rem\] {
-  width: 7rem;
+.group\/little-level-block:hover .group-hover\/little-level-block\:max-h-\[3rem\] {
+  max-height: 3rem;
+}
+
+.group\/little-level-block:hover .group-hover\/little-level-block\:max-w-\[15rem\] {
+  max-width: 15rem;
 }
 
 .group\/avatar:hover .group-hover\/avatar\:scale-110 {

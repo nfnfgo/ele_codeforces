@@ -149,7 +149,7 @@ export function ComboInput<DataType>({
                                         className={function ({ active }) {
                                             return classNames(
                                                 'relative cursor-default select-none py-2 pl-10 pr-4',
-                                                active ? 'bg-primary/50' : '',
+                                                active ? 'bg-primary text-white' : '',
                                             );
                                         }}
                                         value={curData}

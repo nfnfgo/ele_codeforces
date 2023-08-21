@@ -3,7 +3,7 @@ import { immer as immerMiddleware } from 'zustand/middleware/immer';
 import { immerable } from 'immer';
 
 // Models
-import { ContestInfo, HistoryContestInfo } from 'main/api/cf/contests';
+import { ContestInfo, HistoryContestInfo } from 'general/models/cf/contests';
 import { SubmissionInfo } from 'general/models/codeforces';
 
 /**

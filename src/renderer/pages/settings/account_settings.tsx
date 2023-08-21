@@ -8,6 +8,8 @@ import { CFTextIcon } from 'renderer/components/icons/codeforces';
 import { Background } from 'renderer/components/general/background';
 import { SelectionSettingTile, InputSettingTile, SettingTileLayout } from './setting_tile';
 import { GoogleIcon } from 'renderer/components/icons/gicon';
+import { Transition } from '@headlessui/react';
+import { Fragment } from 'react';
 
 // Tools
 import { classNames } from 'renderer/tools/css_tools';
@@ -20,7 +22,7 @@ import { LevelInfo, getLevelInfoByRatings, getLevelInfoByRatingsReturns } from '
 import { useAccountStore, useAccountStoreConfig, AccountData } from 'renderer/stores/accountStore';
 
 // Models
-import { logInCfAccountConfig } from 'main/api/cf/account';
+import { logInCfAccountConfig } from 'general/models/cf/account';
 
 
 /**
@@ -104,7 +106,9 @@ function AccountLoginTile() {
             newAccData.ratings = resData.ratings;
             newAccData.levelName = resData.levelName;
             newAccData.avatarUrl = resData.avatarUrl;
-            updateAccountStore(newAccData);
+            updateAccountStore(function (state) {
+                state.accountData = newAccData;
+            });
 
             setProcessFailed(false);
         }
@@ -395,6 +399,11 @@ function LevelInfoBlock({
     currentLevelInfo: LevelInfo,
 }) {
     let color = levelInfo?.color ?? currentLevelInfo.color;
+
+    // Store hover state of this level info
+    const [isHovered, setIsHovered] = useState(false);
+
+    // check if this level is previous level or after level
     let isPrev: boolean = false;
     if (levelInfo === undefined) {
         if (currentLevelInfo.lowestRatings !== 0) {
@@ -412,7 +421,15 @@ function LevelInfoBlock({
             isPrev = true;
         }
     }
+
+    /**Handle the hover state of thsi level block */
+    function handleHoverStateChange(isHovered: boolean) {
+        // console.log(`Handle level info block hover change: ${isHovered}`);
+        setIsHovered(isHovered);
+    }
+
     return (
+        // Level Info Root Part
         <FlexDiv className={classNames(
             'flex-auto flex-col justify-center',
             'bg-[--level-block-color] text-white',
@@ -421,7 +438,8 @@ function LevelInfoBlock({
         )}
             style={{
                 '--level-block-color': color,
-            } as CSSProperties}>
+            } as CSSProperties}
+            onHoverStateChange={handleHoverStateChange}>
             <p className={classNames(
                 'text-white text-center'
             )}>{levelInfo?.levelName ?? '-'}</p>
@@ -433,13 +451,13 @@ function LevelInfoBlock({
                 }
                 return levelInfo?.lowestRatings ?? '-';
             }() ?? '0'}</p>
-            <div className={classNames(
+            {/* <div className={classNames(
                 'overflow-hidden',
                 'flex flex-row justify-center items-center',
                 'opacity-0 group-hover/little-level-block:opacity-100',
-                'h-0 group-hover/little-level-block:h-[2rem]',
-                'w-0 group-hover/little-level-block:w-[7rem]',
-                'transition-all ease-in-out duration-300',
+                'max-w-0 group-hover/little-level-block:max-w-[15rem]',
+                'max-h-0 group-hover/little-level-block:max-h-[3rem]',
+                'transition-all ease-linear duration-[0.2s]',
                 'whitespace-nowrap',
             )}>
                 <FlexDiv className={classNames(
@@ -457,6 +475,40 @@ function LevelInfoBlock({
                         );
                     }()}
                 </FlexDiv>
-            </div>
+            </div> */}
+            <Transition
+                as={Fragment}
+                show={isHovered}
+
+                enter='transition-all ease-out'
+                enterFrom='opacity-0 max-w-0 max-h-0'
+                enterTo='opacity-100 max-w-[15rem] max-h-[3rem]'
+
+                leave='transition-all ease-out'
+                leaveFrom='opacity-100 max-w-[15rem] max-h-[3rem]'
+                leaveTo='opacity-0 max-w-0 max-h-0'>
+                <div className={classNames(
+                    'overflow-hidden',
+                    'flex flex-row justify-center items-center',
+                    'transition-all ease-linear duration-[0.2s]',
+                    'whitespace-nowrap',
+                )}>
+                    <FlexDiv className={classNames(
+                        'flex-col gap-x-3',
+                    )}>
+                        <div className={classNames(
+                            'h-[1px] bg-white/50',
+                        )}></div>
+                        {function () {
+                            if (levelInfo === undefined) {
+                                return (<p>No level info</p>)
+                            }
+                            return (
+                                <p>{levelInfo?.lowestRatings ?? '-'} ~ {levelInfo?.highestRatings ?? '-'}</p>
+                            );
+                        }()}
+                    </FlexDiv>
+                </div>
+            </Transition>
         </FlexDiv>);
 }

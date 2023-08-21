@@ -26,4 +26,19 @@ export class EleCFError extends Error {
     info: any;
 }
 
-class UIError extends EleCFError { }
+/**
+ * `EleCFError` with a detailed error msg
+ */
+export class EleCFDetailMsgError extends EleCFError {
+    constructor(title: string, msg?: string, err?: Error, info?: any) {
+        let errMsg: string = '';
+        if (err !== undefined) {
+            errMsg = `\nDetailed error message: ${err}`;
+        }
+        super(
+            title,
+            msg + errMsg,
+            info,
+        );
+    }
+}

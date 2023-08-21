@@ -8,6 +8,10 @@
 - WorkOn: Complete problem operation API (e.g.: Submit answer)
 - WorkOn: Complete account API and exposers
 
+## 0.1.5
+
+- Update: Add contest submission info fetch code (untest)
+
 ## 0.1.4
 
 - Update: Use `immer` middleware in contest state management

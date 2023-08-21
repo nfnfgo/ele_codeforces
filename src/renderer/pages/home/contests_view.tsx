@@ -16,8 +16,8 @@ import { GoogleIcon } from 'renderer/components/icons/gicon';
 import { classNames } from 'renderer/tools/css_tools';
 
 // Models
-import { ContestInfo, HistoryContestInfo } from 'main/api/cf/contests';
-import { ProblemDetailedInfo, ProblemInfo, getProblemDetailConfig } from 'main/api/cf/problems';
+import { ContestInfo, HistoryContestInfo } from 'general/models/cf/contests';
+import { ProblemDetailedInfo, ProblemInfo, getProblemDetailConfig } from 'general/models/cf/problems';
 
 // Stores
 import { useContestStateStore, useContestStateStoreConfig, ContestStateData } from 'renderer/stores/contestStateStore';
@@ -34,8 +34,6 @@ export function CFContestsView() {
         (state: useContestStateStoreConfig) => state.info.hideContestListUI);
     let contestId = useContestStateStore(
         (state: useContestStateStoreConfig) => state.info.contestId);
-    let problemId = useContestStateStore(
-        (state: useContestStateStoreConfig) => state.info.problemId);
 
     /**Update info in contest state store */
     let updateContestState = useContestStateStore(
@@ -202,6 +200,7 @@ function CFContestDetailPanel() {
         }
         setLoading(true);
         try {
+            // requesting problems list
             window.electron.ipcRenderer.invoke('api:cf:getContestProblem', contestId).then(
                 function (info) {
                     setLoading(false);
