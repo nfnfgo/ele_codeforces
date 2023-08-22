@@ -62,15 +62,18 @@ function AccountLoginTile() {
     let account: string = '';
     let password: string = '';
 
+    let accountData = useAccountStore(function (state: useAccountStoreConfig) {
+        return state.accountData;
+    });
+
     const [processLogin, setProcessLogin] = useState<boolean>(false);
     const [processFailed, setProcessFailed] = useState<boolean>(false);
 
     let updateAccountStore = useAccountStore(function (state: useAccountStoreConfig) {
         return state.updateAccountData;
     });
-    let accountData = useAccountStore(function (state: useAccountStoreConfig) {
-        return state.accountData;
-    });
+    let saveAccountDataToStorage = useAccountStore((state)=>(state.saveAccountDataToStorage));
+
 
     account = accountData.account ?? '';
     password = accountData.password ?? '';
@@ -106,9 +109,12 @@ function AccountLoginTile() {
             newAccData.ratings = resData.ratings;
             newAccData.levelName = resData.levelName;
             newAccData.avatarUrl = resData.avatarUrl;
+            // if success, update state, and to storage
             updateAccountStore(function (state) {
                 state.accountData = newAccData;
             });
+            await saveAccountDataToStorage();
+
 
             setProcessFailed(false);
         }

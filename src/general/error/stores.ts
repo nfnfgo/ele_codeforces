@@ -14,3 +14,15 @@ class ReadStorageError extends EleCFDetailMsgError {
         );
     }
 }
+
+class WriteStorageError extends EleCFDetailMsgError {
+    constructor(storageName?: string, err?: Error, info?: any) {
+        storageName = setDefault(storageName, 'storage');
+        super(
+            'WriteStorageError',
+            `Error occurred when writing ${storageName} info`,
+            err,
+            info,
+        );
+    }
+}

@@ -2,7 +2,7 @@
 import './contest.css';
 
 // Fundamentals
-import { useState, useEffect } from 'react';
+import { useState, useEffect, CSSProperties } from 'react';
 
 // Components
 import { Center, Container, FlexDiv } from 'renderer/components/container';
@@ -71,6 +71,7 @@ export function ProblemDetailedPanel() {
         loadingSubmissionInfo();
     }, [contestId]);
 
+    /**Request submission info and then update the account state store */
     async function loadingSubmissionInfo() {
         try {
             // Do not fetch data when contestId is undefined
@@ -86,12 +87,16 @@ export function ProblemDetailedPanel() {
                 'api:cf:getContestSubmissionInfo',
                 props,
             );
+            // If not get a valid value, reset to empty list
+            if (submissionInfo === undefined || submissionInfo === null) {
+                submissionInfo = [];
+            }
             // Update the contest state store
             updateContestState(function (state) {
                 state.info.contestSubmissionInfo = submissionInfo;
             });
         } catch (e) {
-            ;
+            console.log(`Failed to request submission info with contestId ${contestId}`);
         }
     }
 
@@ -167,7 +172,9 @@ export function ProblemOperationBar() {
     }
 
     /**Store hover status of the submit button */
-    const [submitButtonHovered, setSubmitButtonHovered] = useState<boolean>(true);
+    const [submitButtonHovered, setSubmitButtonHovered] = useState(false);
+    /**Store hover status of the submission info block */
+    const [submissionInfoHovered, setSubmissionInfoHovered] = useState(false);
 
     /**Hanlde callback function when user click `submit from clipboard` button */
     async function handleClipboardSubmit() {
@@ -195,11 +202,25 @@ export function ProblemOperationBar() {
         if (isHovered === false) {
             cancelDishover = setTimeout(function () {
                 setSubmitButtonHovered(false);
-            }, 200000);
+            }, 300);
         }
         else {
             clearTimeout(cancelDishover);
             setSubmitButtonHovered(isHovered);
+        }
+    }
+
+    let cancelSubmissionDishover: NodeJS.Timeout | undefined = undefined;
+    /**Handle the hover status changes of the submit button */
+    function handleSubmissionInfoHoverStatus(isHovered: boolean) {
+        if (isHovered === false) {
+            cancelSubmissionDishover = setTimeout(function () {
+                setSubmissionInfoHovered(false);
+            }, 300);
+        }
+        else {
+            clearTimeout(cancelSubmissionDishover);
+            setSubmissionInfoHovered(isHovered);
         }
     }
 
@@ -220,7 +241,21 @@ export function ProblemOperationBar() {
                 className={classNames(
                     'origin-bottom-right'
                 )}>
-                <ClipboardSubmitHoverBlock handleHoverStatus={handleSubmitButtonHoverStatus}></ClipboardSubmitHoverBlock>
+                <ClipboardSubmitHoverBlock handleHoverStatus={handleSubmitButtonHoverStatus} />
+            </Transition>
+            {/* Submission Info Block Part */}
+            <Transition
+                show={submissionInfoHovered}
+                enter="transition-all duration-100"
+                enterFrom="opacity-0 scale-75"
+                enterTo="opacity-100 scale-100"
+                leave="transition-all duration-200"
+                leaveFrom="opacity-100 scale-100"
+                leaveTo="opacity-0 scale-75"
+                className={classNames(
+                    'origin-bottom-left'
+                )}>
+                Test
             </Transition>
             <Container
                 hasColor={false}
@@ -242,10 +277,11 @@ export function ProblemOperationBar() {
                         'flex-row justify-between gap-x-2',
                         'py-2 px-2'
                     )}>
-                    {/* Submission Status Bar */}
+                    {/* Submission Status Digest Bar */}
                     <FlexDiv className={classNames(
                         'rounded-full'
                     )}>
+                        <SubmissionInfoDigestBlock />
                     </FlexDiv>
                     {/* Buttons Part */}
                     <FlexDiv className={classNames(
@@ -351,6 +387,78 @@ function ProblemOptBarButton({
                 </FlexDiv>
             </Container>
         </button>
+    </>);
+}
+
+/**
+ * Show a little block with the current submission digest of this problem
+ * 
+ * Usually used inside `ProblemOperationBar` component
+ */
+function SubmissionInfoDigestBlock() {
+    // Stores
+    let submissionInfo: SubmissionInfo[] = useContestStateStore((state) => (state.info.contestSubmissionInfo));
+    let problemId: string | undefined = useContestStateStore((state) => (state.info.problemId));
+
+    // Values
+    // Filtered submission info
+    const [filteredSubmissionInfo, setFilteredSubmissionInfo] = useState<SubmissionInfo[]>([]);
+    useEffect(function () {
+        if (problemId !== undefined) {
+            setFilteredSubmissionInfo(submissionInfo.filter(function (curSubInfo): boolean {
+                return curSubInfo.problemFullName.startsWith(problemId!)
+            }));
+        }
+    }, [problemId]);
+
+    let blockColor: string = '';
+    // No info
+    if (filteredSubmissionInfo.length < 1) {
+        blockColor = 'rgba(0, 0, 0, 0.5)';
+    }
+    // Accept
+    else if (filteredSubmissionInfo[0].verdict.toLowerCase() === 'accepted') {
+        blockColor = 'rgba(0, 186, 68, 1)';
+    }
+    // WA or other unaccepted verdict
+    else {
+        blockColor = 'rgba(197, 154, 0, 1)';
+    }
+
+    /**Problem id not valid */
+    if (problemId === undefined) {
+        return <></>;
+    }
+    return (<>
+        <Container
+            hasColor={false}
+            rounded={false}
+            className={classNames(
+                'bg-color bg-[--cf-block-color]',
+                'rounded-full',
+            )}
+            style={{
+                '--cf-block-color': blockColor,
+            } as CSSProperties}>
+            <FlexDiv
+                expand={true}
+                className={classNames(
+                    'flex-row justify-center items-center',
+                    'mx-4',
+                )}>
+                <p className={classNames(
+                    'text-white text-center font-bold',
+                    'font-mono',
+                )}>
+                    {function () {
+                        if (filteredSubmissionInfo.length < 1) {
+                            return 'No Sub Info';
+                        }
+                        return filteredSubmissionInfo[0].verdict;
+                    }()}
+                </p>
+            </FlexDiv>
+        </Container>
     </>);
 }
 

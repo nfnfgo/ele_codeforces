@@ -115,6 +115,7 @@ export interface useAccountStoreConfig {
      * Automatically read the data from storage package and update current state
      */
     updateAccountDataFromStorage: () => Promise<void>;
+    saveAccountDataToStorage: () => Promise<void>;
 }
 
 
@@ -143,7 +144,26 @@ export const useAccountStore = create(immerMiddleware<useAccountStoreConfig>(
                         `Detail error message: ${e}`
                     );
                 }
-            }
+            },
+            async saveAccountDataToStorage() {
+                try {
+                    // Update info
+                    await window.electron.ipcRenderer.invoke(
+                        'storage:eleCfConfig:setInfo',
+                        'accountInfo',
+                        JSON.parse(JSON.stringify(get().accountData)));
+                    // Notify other window
+                    window.electron.ipcRenderer.invoke('windowmgr:signal:trigger:refresh');
+                    return this;
+                } catch (e) {
+                    throw new eleCfErr.EleCFError(
+                        'WriteStorageError',
+                        'Error occurred when tring to write account info into storage\n' +
+                        `Detail error message: ${e}`
+
+                    );
+                }
+            },
         }
         // add ipcRenderer refresh listener
         window.electron.ipcRenderer.on('windowmgr:signal:refresh', function () {
