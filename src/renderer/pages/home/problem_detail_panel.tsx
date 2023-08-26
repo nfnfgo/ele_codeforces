@@ -24,6 +24,7 @@ import { cfSupportProgramLangList, SupportLangItem, SubmissionInfo } from 'gener
 
 // Stores
 import { useContestStateStore } from 'renderer/stores/contestStateStore';
+import { useSettingsStore } from 'renderer/stores/setting_store';
 
 
 
@@ -164,6 +165,7 @@ export function ProblemDetailedPanel() {
 export function ProblemOperationBar() {
     let contestId = useContestStateStore(state => state.info.contestId);
     let problemId = useContestStateStore(state => state.info.problemId);
+    let defaultCfLangValue: number | undefined = useSettingsStore(state => state.info.defaultSubmitLangValue);
 
     /**If this operation bar is available now */
     let available = true;
@@ -178,14 +180,12 @@ export function ProblemOperationBar() {
 
     /**Hanlde callback function when user click `submit from clipboard` button */
     async function handleClipboardSubmit() {
-        let debugLangValue = 73; // debug submit language type: G++20 winlibs
+        let langValue: number = defaultCfLangValue ?? 73;
         let answerStr = await navigator.clipboard.readText();
-        console.log('Debug: Clipboard code got');
-        console.log(answerStr);
         let submitProblemProps: submitProblemConfig = {
             contestId: contestId!,
             problemId: problemId!,
-            langValue: debugLangValue,
+            langValue: langValue,
             ansCodeString: answerStr,
         };
         let res = await window.electron.ipcRenderer.invoke(
@@ -419,6 +419,11 @@ function SubmissionInfoDigestBlock() {
     // Accept
     else if (filteredSubmissionInfo[0].verdict.toLowerCase() === 'accepted') {
         blockColor = 'rgba(0, 186, 68, 1)';
+    }
+    // Pending status like In queue or Running on tests
+    else if (filteredSubmissionInfo[0].verdict.toLowerCase().includes('in queue') ||
+        filteredSubmissionInfo[0].verdict.toLowerCase().includes('running on')) {
+        blockColor = 'rgba(0, 43, 220, 0.8)';
     }
     // WA or other unaccepted verdict
     else {

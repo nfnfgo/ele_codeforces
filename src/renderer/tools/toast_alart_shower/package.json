@@ -1,0 +1,11 @@
+{
+  "name": "toast_alart_shower",
+  "version": "0.1.0",
+  "description": "Package to show toast and alart in the app",
+  "main": "index.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC"
+}

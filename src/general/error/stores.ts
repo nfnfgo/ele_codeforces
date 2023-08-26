@@ -3,7 +3,7 @@ import { EleCFError, EleCFDetailMsgError } from './base';
 // Tools
 import { setDefault } from 'general/tools/set_default';
 
-class ReadStorageError extends EleCFDetailMsgError {
+export class ReadStorageError extends EleCFDetailMsgError {
     constructor(storageName?: string, err?: Error, info?: any) {
         storageName = setDefault(storageName, 'storage');
         super(
@@ -15,7 +15,7 @@ class ReadStorageError extends EleCFDetailMsgError {
     }
 }
 
-class WriteStorageError extends EleCFDetailMsgError {
+export class WriteStorageError extends EleCFDetailMsgError {
     constructor(storageName?: string, err?: Error, info?: any) {
         storageName = setDefault(storageName, 'storage');
         super(
