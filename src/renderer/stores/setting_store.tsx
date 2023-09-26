@@ -107,7 +107,14 @@ export const useSettingsStore = create(
             stateIns.fromStorage();
         });
         // load from storage when init
-        stateIns.fromStorage();
+        // if there is no settings storage yet, then write the new one into storage
+        try {
+            stateIns.fromStorage().catch(() => {
+                stateIns.toStorage();
+            });
+        } catch (e) {
+            stateIns.toStorage();
+        }
         return stateIns;
     })
 );

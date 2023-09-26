@@ -113,11 +113,11 @@ export class EleCFStorage {
             let propNameList: string[] = propName.split('.');
             let curProp = this.jsonInfo;
             for (let curPropName of propNameList) {
-                curProp = curProp[curPropName];
                 // if meet undefined value, return undefined
                 if (curProp === undefined) {
                     return undefined;
                 }
+                curProp = curProp[curPropName];
             }
             return curProp;
         } catch (e) {
