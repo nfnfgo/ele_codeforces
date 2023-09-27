@@ -14,7 +14,10 @@ import { setDefault } from 'general/tools/set_default';
 
 
 /**
- * Layout compoenent for setting tiles
+ * Offers a left-right layout compoenent for setting tiles
+ * 
+ * Usually you don't need to use this UI layout in high-level UI, this is for different setting tile component, 
+ * only use this layout when you want to highly customize the setting tile in some specified category of settings
  */
 export function SettingTileLayout({
     left,

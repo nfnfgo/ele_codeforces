@@ -42,14 +42,18 @@ export function Background({
     const curDarkmode: boolean | null = useThemeStore(function (state) {
         return (state as useThemeStoreStateConfig).theme.darkMode as (boolean | null);
     });
+
+    // Expose method to refresh darkmode from storage
     let updateDarkmodeFromStorage = useThemeStore(function (state) {
         return (state as useThemeStoreStateConfig).updateDarkModeFromStorage;
     });
+
     // refresh when darkmode changed
     useEffect(function () {
         setUIDarkMode(curDarkmode);
     }, [curDarkmode]);
 
+    // Update darkmode from storage when component first created
     useEffect(function () {
         updateDarkmodeFromStorage();
     }, []);

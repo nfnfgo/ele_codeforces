@@ -17,9 +17,11 @@ import { settingCategoryList } from './settings_data';
 // Settings Blocks
 import { AppearanceSettingBlock } from './appearance_settings';
 import { AccountSettingBlock } from './account_settings';
+import { GeneralSettingsBlock } from './general_settings';
 
 const settingsBlockMap = {
     'Appearance': <AppearanceSettingBlock></AppearanceSettingBlock>,
+    'General': <GeneralSettingsBlock></GeneralSettingsBlock>,
     'Account': <AccountSettingBlock></AccountSettingBlock>,
 };
 
@@ -34,7 +36,6 @@ export function SettingsPage() {
         <Background>
             <div className={classNames(
                 'flex flex-none',
-                'h-screen w-screen',
                 'min-h-0 min-w-0',
             )}>
                 {/* Settings Category Choose */}
